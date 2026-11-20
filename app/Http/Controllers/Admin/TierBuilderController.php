@@ -22,7 +22,7 @@ class TierBuilderController extends Controller
         $event->load(['tierEntries.character']);
 
         $characters = Character::orderBy('name')->get();
-        $tierRanks = ['S+', 'S', 'A', 'B', 'C'];
+        $tierRanks = ['SS', 'S+', 'S', 'A', 'B', 'C'];
         $roles = ['Ace', 'Parent', 'Debuffer'];
         $runningStyles = ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'];
 
@@ -55,7 +55,7 @@ class TierBuilderController extends Controller
                         ->where('role', $request->input('role'));
                 }),
             ],
-            'tier_rank' => ['required', Rule::in(['S+', 'S', 'A', 'B', 'C'])],
+            'tier_rank' => ['required', Rule::in(['SS', 'S+', 'S', 'A', 'B', 'C'])],
             'role' => ['required', Rule::in(['Ace', 'Parent', 'Debuffer'])],
             'recommended_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -111,7 +111,7 @@ class TierBuilderController extends Controller
     public function update(Request $request, Event $event, TierEntry $tierEntry): RedirectResponse
     {
         $validated = $request->validate([
-            'tier_rank' => ['required', Rule::in(['S+', 'S', 'A', 'B', 'C'])],
+            'tier_rank' => ['required', Rule::in(['SS', 'S+', 'S', 'A', 'B', 'C'])],
             'role' => [
                 'required',
                 Rule::in(['Ace', 'Parent', 'Debuffer']),

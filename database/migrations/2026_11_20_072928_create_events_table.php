@@ -15,11 +15,21 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
+            $table->unsignedSmallInteger('cm_number')->nullable();
+            $table->date('event_date')->nullable();
             $table->string('track_name');
             $table->enum('distance_type', ['Sprint', 'Mile', 'Medium', 'Long']);
             $table->unsignedSmallInteger('distance_meters');
             $table->enum('surface', ['Turf', 'Dirt']);
+            $table->enum('season', ['Spring', 'Summer', 'Autumn', 'Winter'])->default('Winter');
+            $table->enum('weather', ['Sunny', 'Cloudy', 'Rainy', 'Snowy'])->default('Sunny');
+            $table->enum('track_condition', ['Firm', 'Good', 'Soft', 'Heavy'])->default('Firm');
             $table->boolean('is_active')->default(false);
+            $table->json('stat_recommendations')->nullable();
+            $table->json('skill_inheritance')->nullable();
+            $table->json('recommended_skills')->nullable();
+            $table->json('supoka_decks')->nullable();
+            $table->json('team_compositions')->nullable();
             $table->timestamps();
         });
     }

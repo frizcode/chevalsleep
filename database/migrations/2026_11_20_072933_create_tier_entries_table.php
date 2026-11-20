@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
             $table->foreignId('character_id')->constrained()->cascadeOnDelete();
-            $table->enum('tier_rank', ['S+', 'S', 'A', 'B', 'C']);
+            $table->enum('tier_rank', ['SS', 'S+', 'S', 'A', 'B', 'C']);
             $table->enum('role', ['Ace', 'Parent', 'Debuffer'])->default('Ace');
             $table->enum('recommended_style', ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer']);
             $table->json('build_notes')->nullable();

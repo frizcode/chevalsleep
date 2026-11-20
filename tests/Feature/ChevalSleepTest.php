@@ -68,6 +68,17 @@ class ChevalSleepTest extends TestCase
         $response->assertSee('Agnes Digital');
     }
 
+    public function test_consecutive_homepage_requests_hit_cache_without_incomplete_class_error(): void
+    {
+        // First request populates cache
+        $this->get('/')->assertStatus(200);
+
+        // Second request reads from cache
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('CM #22 Aquarius Cup');
+    }
+
     public function test_guest_is_redirected_from_admin(): void
     {
         $response = $this->get('/admin');

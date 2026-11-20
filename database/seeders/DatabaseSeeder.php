@@ -27,16 +27,148 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Events
+        // 2. Events (CM #22 Active & CM #21 Archived)
         $aquariusCup = Event::updateOrCreate(
             ['slug' => 'cm-22-aquarius-cup'],
             [
                 'title' => 'CM #22 Aquarius Cup',
+                'cm_number' => 22,
+                'event_date' => '2026-11-15',
                 'track_name' => 'Tokyo 1600m',
                 'distance_type' => 'Mile',
                 'distance_meters' => 1600,
                 'surface' => 'Dirt',
+                'season' => 'Winter',
+                'weather' => 'Sunny',
+                'track_condition' => 'Firm',
                 'is_active' => true,
+                'stat_recommendations' => [
+                    'minimum' => [
+                        'speed' => '1150',
+                        'stamina' => '550',
+                        'power' => '1000',
+                        'guts' => '400',
+                        'wit' => '900',
+                    ],
+                    'recommended' => [
+                        'speed' => '1200+',
+                        'stamina' => '650+',
+                        'power' => '1150+',
+                        'guts' => '450+',
+                        'wit' => '1100+',
+                    ],
+                    'notes' => 'Requires 1 gold recovery skill or 650+ Stamina if intense position rushing occurs on Tokyo 1600m Dirt.',
+                ],
+                'skill_inheritance' => [
+                    'Front Runner' => [
+                        ['name' => 'Angling and Scheming (Seiun Sky)', 'icon' => null],
+                        ['name' => 'Victoria por plancha (El Condor Pasa)', 'icon' => null],
+                    ],
+                    'Pace Chaser' => [
+                        ['name' => 'Shooting for Victory! (Taiki Shuttle)', 'icon' => null],
+                        ['name' => 'Red Shift/LP1211-M (Maruzensky)', 'icon' => null],
+                    ],
+                    'Late Surger' => [
+                        ['name' => "Let's Pump Some Iron! (Mejiro Ryan)", 'icon' => null],
+                        ['name' => 'Shooting for Victory! (Taiki Shuttle)', 'icon' => null],
+                    ],
+                    'End Closer' => [
+                        ['name' => "Let's Pump Some Iron! (Mejiro Ryan)", 'icon' => null],
+                        ['name' => 'Shadow Break (Narita Brian)', 'icon' => null],
+                    ],
+                ],
+                'recommended_skills' => [
+                    'Front Runner' => [
+                        'core_accel' => [
+                            ['name' => 'Groundwork', 'icon' => null],
+                            ['name' => 'Early Lead', 'icon' => null],
+                        ],
+                        'velocity_other' => [
+                            ['name' => 'Mile Corners◯', 'icon' => null],
+                            ['name' => 'Front Runner Straightaways◯', 'icon' => null],
+                            ['name' => 'Escape Artist', 'icon' => null],
+                        ],
+                    ],
+                    'Pace Chaser' => [
+                        'core_accel' => [
+                            ['name' => 'No Stopping Me!', 'icon' => null],
+                            ['name' => 'Head-On', 'icon' => null],
+                        ],
+                        'velocity_other' => [
+                            ['name' => 'Speed Star', 'icon' => null],
+                            ['name' => 'Mile Straightaways◯', 'icon' => null],
+                            ['name' => 'Fast Pace', 'icon' => null],
+                        ],
+                    ],
+                    'Late Surger' => [
+                        'core_accel' => [
+                            ['name' => 'On Your Left!', 'icon' => null],
+                            ['name' => 'No Stopping Me!', 'icon' => null],
+                            ['name' => 'Nimble Navigator', 'icon' => null],
+                        ],
+                        'velocity_other' => [
+                            ['name' => 'Outer Swell', 'icon' => null],
+                            ['name' => 'Furious Feat', 'icon' => null],
+                            ['name' => 'Mile Corners◯', 'icon' => null],
+                        ],
+                    ],
+                    'End Closer' => [
+                        'core_accel' => [
+                            ['name' => 'Straightaway Spurt', 'icon' => null],
+                            ['name' => 'No Stopping Me!', 'icon' => null],
+                        ],
+                        'velocity_other' => [
+                            ['name' => 'Encroaching Shadow', 'icon' => null],
+                            ['name' => 'Late Surge Prep', 'icon' => null],
+                        ],
+                    ],
+                ],
+                'supoka_decks' => [
+                    [
+                        'archetype' => '2 Speed / 2 Power / 2 Wit (Standard Ace)',
+                        'cards' => [
+                            ['name' => 'SSR Kitasan Black (Speed)', 'icon' => null],
+                            ['name' => 'SSR Agnes Tachyon (Speed)', 'icon' => null],
+                            ['name' => 'SSR El Condor Pasa (Power)', 'icon' => null],
+                            ['name' => 'SR Daiwa Scarlet (Power)', 'icon' => null],
+                            ['name' => 'SSR Fine Motion (Wit)', 'icon' => null],
+                            ['name' => 'SSR Nice Nature (Wit)', 'icon' => null],
+                        ],
+                        'notes' => 'Ideal for reaching 1200 Speed / 1100+ Power / 1100+ Wit without dedicated Stamina cards on Tokyo Dirt.',
+                    ],
+                    [
+                        'archetype' => '3 Speed / 1 Stamina / 2 Wit (Budget / Consistency)',
+                        'cards' => [
+                            ['name' => 'SSR Kitasan Black (Speed)', 'icon' => null],
+                            ['name' => 'SR Sweep Tosho (Speed)', 'icon' => null],
+                            ['name' => 'SR Shinko Windy (Speed)', 'icon' => null],
+                            ['name' => 'SSR Super Creek (Stamina)', 'icon' => null],
+                            ['name' => 'SR Marvelous Sunday (Wit)', 'icon' => null],
+                            ['name' => 'SSR Fine Motion (Wit)', 'icon' => null],
+                        ],
+                        'notes' => 'Ensures Maestro recovery for guaranteed stamina safety even with high rushing pace.',
+                    ],
+                ],
+                'team_compositions' => [
+                    [
+                        'name' => 'Double Front + Late Surger Ace',
+                        'lineup' => [
+                            'Smart Falcon (Front Ace)',
+                            'Seiun Sky (Front Ace/Pace Setter)',
+                            'Agnes Digital (Late Surger Ace)',
+                        ],
+                        'strategy' => 'Secures lead from start to deny solo front runners while Agnes Digital cleans up the stretch.',
+                    ],
+                    [
+                        'name' => 'Front Runner + 2 Pace Chasers',
+                        'lineup' => [
+                            'Smart Falcon (Front Runner)',
+                            'Oguri Cap (Pace Chaser)',
+                            'Taiki Shuttle (Pace Chaser)',
+                        ],
+                        'strategy' => 'Dominates mid-leg speed and creates early acceleration wall at the final corner.',
+                    ],
+                ],
             ]
         );
 
@@ -44,15 +176,96 @@ class DatabaseSeeder extends Seeder
             ['slug' => 'cm-21-capricorn-cup'],
             [
                 'title' => 'CM #21 Capricorn Cup',
+                'cm_number' => 21,
+                'event_date' => '2026-10-15',
                 'track_name' => 'Chukyo 1200m',
                 'distance_type' => 'Sprint',
                 'distance_meters' => 1200,
                 'surface' => 'Turf',
+                'season' => 'Winter',
+                'weather' => 'Cloudy',
+                'track_condition' => 'Good',
                 'is_active' => false,
+                'stat_recommendations' => [
+                    'minimum' => [
+                        'speed' => '1200',
+                        'stamina' => '450',
+                        'power' => '1100',
+                        'guts' => '400',
+                        'wit' => '1000',
+                    ],
+                    'recommended' => [
+                        'speed' => '1200+',
+                        'stamina' => '500+',
+                        'power' => '1150+',
+                        'guts' => '450+',
+                        'wit' => '1100+',
+                    ],
+                    'notes' => 'Sprint distance requires zero recovery skills if stamina exceeds 450.',
+                ],
+                'skill_inheritance' => [
+                    'Front Runner' => [
+                        ['name' => 'Angling and Scheming (Seiun Sky)', 'icon' => null],
+                        ['name' => 'Operation: Plan C (Curren Chan)', 'icon' => null],
+                    ],
+                    'Pace Chaser' => [
+                        ['name' => 'Shooting for Victory! (Taiki Shuttle)', 'icon' => null],
+                        ['name' => 'Victory Shot! (Taiki Shuttle)', 'icon' => null],
+                    ],
+                    'Late Surger' => [
+                        ['name' => "Let's Pump Some Iron! (Mejiro Ryan)", 'icon' => null],
+                    ],
+                    'End Closer' => [
+                        ['name' => "Let's Pump Some Iron! (Mejiro Ryan)", 'icon' => null],
+                    ],
+                ],
+                'recommended_skills' => [
+                    'Front Runner' => [
+                        'core_accel' => [['name' => 'Groundwork', 'icon' => null]],
+                        'velocity_other' => [['name' => 'Sprint Corners◯', 'icon' => null]],
+                    ],
+                    'Pace Chaser' => [
+                        'core_accel' => [['name' => 'Victory Shot!', 'icon' => null]],
+                        'velocity_other' => [['name' => 'Straightaway Sprint', 'icon' => null]],
+                    ],
+                    'Late Surger' => [
+                        'core_accel' => [['name' => 'Sprint Straightaways◯', 'icon' => null]],
+                        'velocity_other' => [['name' => 'Nimble Navigator', 'icon' => null]],
+                    ],
+                    'End Closer' => [
+                        'core_accel' => [['name' => 'Straightaway Spurt', 'icon' => null]],
+                        'velocity_other' => [['name' => 'Sprint Corners◯', 'icon' => null]],
+                    ],
+                ],
+                'supoka_decks' => [
+                    [
+                        'archetype' => '3 Speed / 1 Power / 2 Wit (Sprint Focus)',
+                        'cards' => [
+                            ['name' => 'SSR Kitasan Black (Speed)', 'icon' => null],
+                            ['name' => 'SSR Biko Pegasus (Speed)', 'icon' => null],
+                            ['name' => 'SR Shinko Windy (Speed)', 'icon' => null],
+                            ['name' => 'SSR Vodka (Power)', 'icon' => null],
+                            ['name' => 'SSR Fine Motion (Wit)', 'icon' => null],
+                            ['name' => 'SSR Nice Nature (Wit)', 'icon' => null],
+                        ],
+                        'notes' => 'Maximum sprint speed and power deck for Chukyo 1200m.',
+                    ],
+                ],
+                'team_compositions' => [
+                    [
+                        'name' => 'Front Runner + 2 Pace Chasers',
+                        'lineup' => [
+                            'Seiun Sky (Front Ace)',
+                            'Taiki Shuttle (Pace Chaser)',
+                            'Oguri Cap (Pace Chaser)',
+                        ],
+                        'strategy' => 'Overwhelms the final stretch with instant sprint acceleration.',
+                    ],
+                ],
             ]
         );
 
-        // 3. Characters
+        // 3. Characters (10 Characters)
         $charactersData = [
             [
                 'name' => 'Agnes Digital',
@@ -141,30 +354,31 @@ class DatabaseSeeder extends Seeder
             $characters[$c['slug']] = Character::updateOrCreate(['slug' => $c['slug']], $c);
         }
 
-        // 4. Tier Entries for CM #22 Aquarius Cup (Tokyo 1600m Dirt Mile)
+        // 4. Tier Entries for CM #22 Aquarius Cup (With SS rank)
         $aquariusEntries = [
             [
                 'event_id' => $aquariusCup->id,
                 'character_id' => $characters['agnes-digital-alter']->id,
-                'tier_rank' => 'S+',
+                'tier_rank' => 'SS',
                 'role' => 'Ace',
                 'recommended_style' => 'Late Surger',
                 'sort_order' => 1,
                 'build_notes' => [
-                    'target_stats' => '1200 / 600+ / 1100+ / 450+ / 1000+',
+                    'target_stats' => '1200 / 650+ / 1150+ / 450+ / 1000+',
                     'mandatory_skills' => [
                         'No Stopping Me!',
                         'Nimble Navigator',
                         'Aquarius Straightaways',
+                        'Mile Corners◯',
                     ],
                     'inherited_uniques' => ['Red Shift/LP1211-M', 'Shooting for Victory!'],
-                    'summary' => 'Premier Dirt Mile Late Surger with high acceleration consistency on Tokyo 1600m.',
+                    'summary' => 'Undisputed Apex Dirt Mile Late Surger with high acceleration consistency on Tokyo 1600m.',
                 ],
             ],
             [
                 'event_id' => $aquariusCup->id,
                 'character_id' => $characters['smart-falcon']->id,
-                'tier_rank' => 'S+',
+                'tier_rank' => 'SS',
                 'role' => 'Ace',
                 'recommended_style' => 'Front Runner',
                 'sort_order' => 2,
@@ -173,17 +387,17 @@ class DatabaseSeeder extends Seeder
                     'mandatory_skills' => [
                         'Groundwork',
                         'Escape Artist',
-                        'Dirt Corner◯',
+                        'Dirt Corners◯',
                         'Front Runner Straightaways◯',
                     ],
-                    'inherited_uniques' => ['Angling x Scheming', 'Operation: Plan C'],
+                    'inherited_uniques' => ['Angling and Scheming', 'Operation: Plan C'],
                     'summary' => 'Dominant front-runner with intrinsic dirt aptitude. Dictates pace from the start and secures lead into the final stretch.',
                 ],
             ],
             [
                 'event_id' => $aquariusCup->id,
                 'character_id' => $characters['oguri-cap']->id,
-                'tier_rank' => 'S',
+                'tier_rank' => 'S+',
                 'role' => 'Ace',
                 'recommended_style' => 'Pace Chaser',
                 'sort_order' => 3,
@@ -202,7 +416,7 @@ class DatabaseSeeder extends Seeder
             [
                 'event_id' => $aquariusCup->id,
                 'character_id' => $characters['taiki-shuttle']->id,
-                'tier_rank' => 'S',
+                'tier_rank' => 'S+',
                 'role' => 'Parent',
                 'recommended_style' => 'Pace Chaser',
                 'sort_order' => 4,
@@ -210,10 +424,10 @@ class DatabaseSeeder extends Seeder
                     'target_stats' => '1150 / 600+ / 1100+ / 400+ / 900+',
                     'mandatory_skills' => [
                         'Victory Shot!',
-                        'Pace Chaser Corner◯',
+                        'Pace Chaser Corners◯',
                         'Dirt Straightaways◯',
                     ],
-                    'inherited_uniques' => ['Shooting for Victory!', 'Angling x Scheming'],
+                    'inherited_uniques' => ['Shooting for Victory!', 'Angling and Scheming'],
                     'summary' => "Essential parent character providing 'Victory Shot!' inheritance to all Dirt Mile pace chasers.",
                 ],
             ],
@@ -229,9 +443,9 @@ class DatabaseSeeder extends Seeder
                     'mandatory_skills' => [
                         'Groundwork',
                         'Mid-leg Dominance',
-                        'Mile Corner◯',
+                        'Mile Corners◯',
                     ],
-                    'inherited_uniques' => ['Angling x Scheming', 'Red Shift/LP1211-M'],
+                    'inherited_uniques' => ['Angling and Scheming', 'Red Shift/LP1211-M'],
                     'summary' => 'Strong contender if given Dirt factor conversion. Consistent mid-leg unique activation keeps position 1 secured.',
                 ],
             ],
@@ -245,7 +459,7 @@ class DatabaseSeeder extends Seeder
                 'build_notes' => [
                     'target_stats' => '1100 / 600+ / 1050+ / 450+ / 850+',
                     'mandatory_skills' => [
-                        'Late Surger Corner◯',
+                        'Late Surger Corners◯',
                         'Calm & Collected',
                         'Nimble Navigator',
                     ],
@@ -325,13 +539,13 @@ class DatabaseSeeder extends Seeder
             [
                 'event_id' => $capricornCup->id,
                 'character_id' => $characters['seiun-sky']->id,
-                'tier_rank' => 'S+',
+                'tier_rank' => 'SS',
                 'role' => 'Ace',
                 'recommended_style' => 'Front Runner',
                 'sort_order' => 1,
                 'build_notes' => [
                     'target_stats' => '1200 / 450+ / 1150+ / 400+ / 1100+',
-                    'mandatory_skills' => ['Angling x Scheming', 'Groundwork', 'Sprint Corner◯'],
+                    'mandatory_skills' => ['Angling and Scheming', 'Groundwork', 'Sprint Corners◯'],
                     'inherited_uniques' => ['Operation: Plan C'],
                     'summary' => 'Premier sprint front runner with lethal corner acceleration unique.',
                 ],
@@ -339,27 +553,27 @@ class DatabaseSeeder extends Seeder
             [
                 'event_id' => $capricornCup->id,
                 'character_id' => $characters['taiki-shuttle']->id,
-                'tier_rank' => 'S',
+                'tier_rank' => 'S+',
                 'role' => 'Ace',
                 'recommended_style' => 'Pace Chaser',
                 'sort_order' => 2,
                 'build_notes' => [
                     'target_stats' => '1200 / 450+ / 1100+ / 400+ / 900+',
-                    'mandatory_skills' => ['Victory Shot!', 'Sprint Straightaways◯', 'Sprint Corner◯'],
-                    'inherited_uniques' => ['Angling x Scheming'],
+                    'mandatory_skills' => ['Victory Shot!', 'Sprint Straightaways◯', 'Sprint Corners◯'],
+                    'inherited_uniques' => ['Angling and Scheming'],
                     'summary' => "Ideal track layout for Taiki's unique to trigger at the exact acceleration phase.",
                 ],
             ],
             [
                 'event_id' => $capricornCup->id,
                 'character_id' => $characters['oguri-cap']->id,
-                'tier_rank' => 'A',
+                'tier_rank' => 'S',
                 'role' => 'Ace',
                 'recommended_style' => 'Pace Chaser',
                 'sort_order' => 3,
                 'build_notes' => [
                     'target_stats' => '1150 / 500+ / 1100+ / 400+ / 850+',
-                    'mandatory_skills' => ['Gourmet', 'Sprint Corner◯', 'Straightaway Sprint'],
+                    'mandatory_skills' => ['Gourmet', 'Sprint Corners◯', 'Straightaway Sprint'],
                     'inherited_uniques' => ['Victory Shot!'],
                     'summary' => 'Viable with Sprint factor upgrade, strong closer in the final 200m.',
                 ],
@@ -382,9 +596,9 @@ class DatabaseSeeder extends Seeder
             [
                 'event_id' => $aquariusCup->id,
                 'character_id' => $characters['agnes-digital-alter']->id,
-                'previous_tier' => 'S',
-                'new_tier' => 'S+',
-                'reason' => 'Meta shift: Late Surger acceleration skills proved more consistent than pure Front Runners on Tokyo 1600m.',
+                'previous_tier' => 'S+',
+                'new_tier' => 'SS',
+                'reason' => 'Elevated to SS Apex rank: Late Surger acceleration skills proved overwhelmingly consistent on Tokyo 1600m Dirt.',
                 'created_at' => now()->subDays(2),
             ],
             [
@@ -392,7 +606,7 @@ class DatabaseSeeder extends Seeder
                 'character_id' => $characters['maruzensky-summer']->id,
                 'previous_tier' => null,
                 'new_tier' => 'S',
-                'reason' => 'Added to S tier after community testing confirmed viability of 10★ Dirt factor conversion.',
+                'reason' => 'Added to S tier after community testing confirmed viability with 10★ Dirt factor conversion.',
                 'created_at' => now()->subDay(),
             ],
             [
@@ -400,7 +614,7 @@ class DatabaseSeeder extends Seeder
                 'character_id' => $characters['gold-ship']->id,
                 'previous_tier' => 'A',
                 'new_tier' => 'B',
-                'reason' => 'Demoted to B tier as dedicated debuff strategies became less effective against dual-lead Front Runner team comps.',
+                'reason' => 'Demoted to B tier as dedicated debuff strategies proved less impactful against dual-lead Front Runner comps.',
                 'created_at' => now()->subHours(6),
             ],
         ];

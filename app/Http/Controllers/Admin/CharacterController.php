@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Character;
+use App\Services\GameToraAssetService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,10 @@ use Illuminate\View\View;
 
 class CharacterController extends Controller
 {
+    public function __construct(
+        protected GameToraAssetService $assetService
+    ) {}
+
     /**
      * Display a listing of the characters.
      */
@@ -49,6 +54,7 @@ class CharacterController extends Controller
             'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
             'rarity' => ['required', 'integer', 'min:1', 'max:3'],
             'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
+            'gametora_avatar_url' => ['nullable', 'url'],
         ]);
 
         if (empty($validated['slug'])) {
@@ -61,6 +67,15 @@ class CharacterController extends Controller
             $validated['slug'] = $slug;
         }
 
+        // Option 1: GameTora image URL import
+        if ($request->filled('gametora_avatar_url')) {
+            $importedPath = $this->assetService->importFromUrl($request->input('gametora_avatar_url'), 'characters');
+            if ($importedPath) {
+                $validated['avatar_webp'] = $importedPath;
+            }
+        }
+
+        // Option 2: Manual file upload (takes precedence if both provided)
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $filename = $validated['slug'] . '-' . time() . '.' . $file->getClientOriginalExtension();
@@ -68,7 +83,7 @@ class CharacterController extends Controller
             $validated['avatar_webp'] = $path;
         }
 
-        unset($validated['avatar']);
+        unset($validated['avatar'], $validated['gametora_avatar_url']);
 
         $character = Character::create($validated);
 
@@ -99,6 +114,7 @@ class CharacterController extends Controller
             'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
             'rarity' => ['required', 'integer', 'min:1', 'max:3'],
             'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
+            'gametora_avatar_url' => ['nullable', 'url'],
         ]);
 
         if (empty($validated['slug'])) {
@@ -111,18 +127,31 @@ class CharacterController extends Controller
             $validated['slug'] = $slug;
         }
 
+        $newAvatarPath = null;
+
+        // Option 1: GameTora image URL import
+        if ($request->filled('gametora_avatar_url')) {
+            $imported = $this->assetService->importFromUrl($request->input('gametora_avatar_url'), 'characters');
+            if ($imported) {
+                $newAvatarPath = $imported;
+            }
+        }
+
+        // Option 2: Manual file upload
         if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = $validated['slug'] . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $newAvatarPath = $file->storeAs('characters', $filename, 'public');
+        }
+
+        if ($newAvatarPath) {
             if ($character->avatar_webp && Storage::disk('public')->exists($character->avatar_webp)) {
                 Storage::disk('public')->delete($character->avatar_webp);
             }
-
-            $file = $request->file('avatar');
-            $filename = $validated['slug'] . '-' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('characters', $filename, 'public');
-            $validated['avatar_webp'] = $path;
+            $validated['avatar_webp'] = $newAvatarPath;
         }
 
-        unset($validated['avatar']);
+        unset($validated['avatar'], $validated['gametora_avatar_url']);
 
         $character->update($validated);
 

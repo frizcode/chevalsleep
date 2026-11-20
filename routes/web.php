@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\AssetImportController;
 use App\Http\Controllers\Admin\CharacterController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\TierBuilderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\CmController;
+use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\TierListController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,7 +16,41 @@ use Illuminate\Support\Facades\Route;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', [TierListController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Champions Meeting Meta Guides
+Route::get('/cm', [CmController::class, 'latest'])->name('cm.latest');
+Route::get('/cm/{event:slug}', [CmController::class, 'show'])->name('cm.show');
+
+// Legacy tier list route redirect / fallback
+Route::get('/tier-list', [TierListController::class, 'index'])->name('tier-list');
+
+// Encyclopedia & Wiki Placeholders (Cheval Grand Coming Soon Views)
+Route::prefix('guides')->name('guides.')->group(function () {
+    Route::get('/umas', function () {
+        return view('public.guides.placeholder', [
+            'title' => 'Uma Musume Encyclopedia',
+            'subtitle' => 'Comprehensive database of all Global & JP Uma Musume racers, growth rates, aptitudes, and hidden mechanics.',
+            'category' => 'Uma Database',
+        ]);
+    })->name('umas');
+
+    Route::get('/supoka', function () {
+        return view('public.guides.placeholder', [
+            'title' => 'Support Card (Supoka) Compendium',
+            'subtitle' => 'Detailed tier ranking, hint skill pools, training event options, and specialization multipliers for all Support Cards.',
+            'category' => 'Support Cards',
+        ]);
+    })->name('supoka');
+
+    Route::get('/skills', function () {
+        return view('public.guides.placeholder', [
+            'title' => 'Skills & Race Mechanics Guide',
+            'subtitle' => 'In-depth breakdown of acceleration phases, target velocity calculation, stamina drain mechanics, and track factor conversions.',
+            'category' => 'Mechanics & Skills',
+        ]);
+    })->name('skills');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +79,9 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // GameTora Asset Importer
+    Route::post('assets/import-url', [AssetImportController::class, 'store'])->name('assets.import-url');
 
     // Events Management
     Route::post('events/{event}/activate', [EventController::class, 'activate'])->name('events.activate');

@@ -20,11 +20,21 @@ class Event extends Model
     protected $fillable = [
         'title',
         'slug',
+        'cm_number',
+        'event_date',
         'track_name',
         'distance_type',
         'distance_meters',
         'surface',
+        'season',
+        'weather',
+        'track_condition',
         'is_active',
+        'stat_recommendations',
+        'skill_inheritance',
+        'recommended_skills',
+        'supoka_decks',
+        'team_compositions',
     ];
 
     /**
@@ -34,6 +44,14 @@ class Event extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
+        'cm_number' => 'integer',
+        'distance_meters' => 'integer',
+        'event_date' => 'date',
+        'stat_recommendations' => 'array',
+        'skill_inheritance' => 'array',
+        'recommended_skills' => 'array',
+        'supoka_decks' => 'array',
+        'team_compositions' => 'array',
     ];
 
     /**

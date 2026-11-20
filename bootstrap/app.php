@@ -1,5 +1,7 @@
 <?php
 
+ini_set('unserialize_callback_func', 'spl_autoload_call');
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
