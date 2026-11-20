@@ -1,0 +1,461 @@
+@extends('layouts.admin')
+
+@section('content')
+<div x-data="{
+    editModalOpen: false,
+    editData: {
+        id: null,
+        character_name: '',
+        tier_rank: 'S',
+        role: 'Ace',
+        recommended_style: 'Front Runner',
+        sort_order: 0,
+        target_stats: '',
+        mandatory_skills: '',
+        inherited_uniques: '',
+        summary: '',
+        changelog_reason: '',
+        action_url: ''
+    },
+    openEdit(entry) {
+        this.editData.id = entry.id;
+        this.editData.character_name = entry.character ? (entry.character.name + (entry.character.variant_title && entry.character.variant_title !== 'Original' ? ' (' + entry.character.variant_title + ')' : '')) : 'Character';
+        this.editData.tier_rank = entry.tier_rank;
+        this.editData.role = entry.role;
+        this.editData.recommended_style = entry.recommended_style;
+        this.editData.sort_order = entry.sort_order || 0;
+        
+        let notes = entry.build_notes || {};
+        this.editData.target_stats = notes.target_stats || '';
+        this.editData.mandatory_skills = Array.isArray(notes.mandatory_skills) ? notes.mandatory_skills.join(', ') : (notes.mandatory_skills || '');
+        this.editData.inherited_uniques = Array.isArray(notes.inherited_uniques) ? notes.inherited_uniques.join(', ') : (notes.inherited_uniques || '');
+        this.editData.summary = notes.summary || '';
+        this.editData.changelog_reason = '';
+        this.editData.action_url = '{{ url('admin/events/' . $event->id . '/tiers') }}/' + entry.id;
+        this.editModalOpen = true;
+    }
+}" class="space-y-6">
+
+    <!-- Workspace Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
+                <span>Tier List Workspace</span>
+                <span>&bull;</span>
+                <span>{{ $event->surface }} &bull; {{ $event->distance_type }} ({{ $event->distance_meters }}m)</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center space-x-3">
+                <span>{{ $event->title }}</span>
+                @if ($event->is_active)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        Active
+                    </span>
+                @endif
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">Track: <span class="text-slate-200 font-semibold">{{ $event->track_name }}</span></p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('home', ['event' => $event->slug]) }}" target="_blank"
+               class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors inline-flex items-center space-x-1.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span>Preview Public Page</span>
+            </a>
+            <a href="{{ route('admin.events.index') }}" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+                &larr; Back to Events
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Workspace Grid: Tier List (Left) + Add Character Form (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Current Tier List Entries (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
+            @php
+                $tierColors = [
+                    'S+' => 'bg-gradient-to-r from-rose-600 to-amber-500 text-white font-black',
+                    'S'  => 'bg-amber-500 text-slate-950 font-black',
+                    'A'  => 'bg-violet-600 text-white font-bold',
+                    'B'  => 'bg-sky-600 text-white font-bold',
+                    'C'  => 'bg-slate-700 text-slate-200 font-semibold',
+                ];
+            @endphp
+
+            @foreach ($tierRanks as $rank)
+                @php
+                    $entries = $groupedEntries[$rank] ?? collect();
+                @endphp
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                    <!-- Tier Header -->
+                    <div class="p-3.5 px-4 bg-slate-950/70 border-b border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-10 h-8 rounded-lg flex items-center justify-center text-sm shadow-sm {{ $tierColors[$rank] ?? 'bg-slate-800' }}">
+                                {{ $rank }}
+                            </span>
+                            <span class="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+                                Tier {{ $rank }}
+                            </span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500">
+                            {{ $entries->count() }} {{ Str::plural('entry', $entries->count()) }}
+                        </span>
+                    </div>
+
+                    <!-- Entries in this Tier -->
+                    <div class="divide-y divide-slate-800/80">
+                        @forelse ($entries as $entry)
+                            <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/40 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <!-- Avatar / Fallback -->
+                                    @if ($entry->character?->avatar_url)
+                                        <img src="{{ $entry->character->avatar_url }}" alt="{{ $entry->character->name }}"
+                                             class="w-11 h-11 rounded-xl object-cover border border-slate-700 bg-slate-950 flex-shrink-0">
+                                    @else
+                                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-bold text-xs text-amber-400 flex-shrink-0">
+                                            {{ strtoupper(substr($entry->character?->name ?? 'CH', 0, 2)) }}
+                                        </div>
+                                    @endif
+
+                                    <div class="space-y-1">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-extrabold text-white text-sm">
+                                                {{ $entry->character?->full_name ?? 'Unknown Character' }}
+                                            </span>
+                                            <span class="text-xs text-slate-500 font-mono">#{{ $entry->sort_order }}</span>
+                                        </div>
+
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <!-- Role Badge -->
+                                            @php
+                                                $roleClasses = [
+                                                    'Ace' => 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+                                                    'Parent' => 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+                                                    'Debuffer' => 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30',
+                                                ];
+                                            @endphp
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ $roleClasses[$entry->role] ?? 'bg-slate-800' }}">
+                                                {{ $entry->role }}
+                                            </span>
+
+                                            <!-- Style Pill -->
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                                                {{ $entry->recommended_style }}
+                                            </span>
+
+                                            @if (!empty($entry->build_notes['target_stats']))
+                                                <span class="text-[10px] text-slate-400 font-mono hidden sm:inline" title="Target Stats">
+                                                    Stats: {{ Str::limit($entry->build_notes['target_stats'], 25) }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-center space-x-2 self-end sm:self-center">
+                                    <button type="button"
+                                            @click="openEdit({{ json_encode($entry) }})"
+                                            class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors">
+                                        Edit
+                                    </button>
+
+                                    <form method="POST" action="{{ route('admin.events.tiers.destroy', [$event, $entry]) }}" class="inline"
+                                          onsubmit="return confirm('Remove this character from {{ $rank }} tier?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="p-1 rounded-lg text-rose-400 hover:text-rose-200 hover:bg-rose-950/40 transition-colors"
+                                                title="Remove Entry">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="p-4 text-center text-xs text-slate-500 italic">
+                                No characters currently in {{ $rank }} tier.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Right: Add Character to Tier List (5 Cols - Sticky) -->
+        <div class="lg:col-span-5 sticky top-20">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+                <div class="border-b border-slate-800 pb-3">
+                    <h2 class="text-base font-extrabold text-white flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Character to Tier List</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Assign a character, role, rank, and competitive build notes.</p>
+                </div>
+
+                <form method="POST" action="{{ route('admin.events.tiers.store', $event) }}" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label for="character_id" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            Character <span class="text-rose-400">*</span>
+                        </label>
+                        <select id="character_id" name="character_id" required
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                            <option value="">-- Select Character --</option>
+                            @foreach ($characters as $character)
+                                <option value="{{ $character->id }}" {{ old('character_id') == $character->id ? 'selected' : '' }}>
+                                    {{ $character->full_name }} ({{ $character->default_running_style }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="tier_rank" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Tier Rank <span class="text-rose-400">*</span>
+                            </label>
+                            <select id="tier_rank" name="tier_rank" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($tierRanks as $rank)
+                                    <option value="{{ $rank }}" {{ old('tier_rank', 'S') === $rank ? 'selected' : '' }}>
+                                        Tier {{ $rank }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="role" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Role <span class="text-rose-400">*</span>
+                            </label>
+                            <select id="role" name="role" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role }}" {{ old('role', 'Ace') === $role ? 'selected' : '' }}>
+                                        {{ $role }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="recommended_style" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Recommended Style <span class="text-rose-400">*</span>
+                            </label>
+                            <select id="recommended_style" name="recommended_style" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($runningStyles as $style)
+                                    <option value="{{ $style }}" {{ old('recommended_style') === $style ? 'selected' : '' }}>
+                                        {{ $style }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="sort_order" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Sort Order
+                            </label>
+                            <input type="number" id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <!-- Build Notes Inputs -->
+                    <div class="pt-2 border-t border-slate-800 space-y-3">
+                        <span class="block text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+                            Build Notes & Recommendations
+                        </span>
+
+                        <div>
+                            <label for="target_stats" class="block text-xs font-medium text-slate-300 mb-1">
+                                Target Stats
+                            </label>
+                            <input type="text" id="target_stats" name="target_stats" value="{{ old('target_stats') }}"
+                                   placeholder="e.g. 1200 / 600+ / 1100+ / 450+ / 1000+"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="mandatory_skills" class="block text-xs font-medium text-slate-300 mb-1">
+                                Mandatory Skills <span class="text-slate-500 text-[10px]">(comma-separated)</span>
+                            </label>
+                            <input type="text" id="mandatory_skills" name="mandatory_skills" value="{{ old('mandatory_skills') }}"
+                                   placeholder="e.g. Groundwork, Escape Artist, Dirt Corner◯"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="inherited_uniques" class="block text-xs font-medium text-slate-300 mb-1">
+                                Inherited Unique Skills <span class="text-slate-500 text-[10px]">(comma-separated)</span>
+                            </label>
+                            <input type="text" id="inherited_uniques" name="inherited_uniques" value="{{ old('inherited_uniques') }}"
+                                   placeholder="e.g. Angling x Scheming, Shooting for Victory!"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="summary" class="block text-xs font-medium text-slate-300 mb-1">
+                                Meta Analysis Summary
+                            </label>
+                            <textarea id="summary" name="summary" rows="3"
+                                      placeholder="Summary of track viability, strengths, and role synergy..."
+                                      class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">{{ old('summary') }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Changelog Recording -->
+                    <div class="pt-2 border-t border-slate-800">
+                        <label for="changelog_reason" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            Changelog Reason <span class="text-slate-500 font-normal lowercase">(optional audit note)</span>
+                        </label>
+                        <input type="text" id="changelog_reason" name="changelog_reason" value="{{ old('changelog_reason') }}"
+                               placeholder="e.g. Placed into S+ tier due to dominant front runner stats"
+                               class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-950/30 transition-all">
+                        + Add To Tier List
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Entry Modal (Alpine.js) -->
+    <div x-show="editModalOpen" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+             @click="editModalOpen = false"></div>
+
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5 text-slate-200"
+                 @keydown.escape.window="editModalOpen = false">
+                
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Edit Tier Entry</h3>
+                        <p class="text-xs text-amber-400 font-semibold" x-text="editData.character_name"></p>
+                    </div>
+                    <button type="button" @click="editModalOpen = false" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+                </div>
+
+                <form :action="editData.action_url" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Tier Rank <span class="text-rose-400">*</span>
+                            </label>
+                            <select name="tier_rank" x-model="editData.tier_rank" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($tierRanks as $rank)
+                                    <option value="{{ $rank }}">Tier {{ $rank }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Role <span class="text-rose-400">*</span>
+                            </label>
+                            <select name="role" x-model="editData.role" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role }}">{{ $role }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Recommended Style <span class="text-rose-400">*</span>
+                            </label>
+                            <select name="recommended_style" x-model="editData.recommended_style" required
+                                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @foreach ($runningStyles as $style)
+                                    <option value="{{ $style }}">{{ $style }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                                Sort Order
+                            </label>
+                            <input type="number" name="sort_order" x-model="editData.sort_order" min="0"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800 space-y-3">
+                        <span class="block text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+                            Build Notes
+                        </span>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Target Stats</label>
+                            <input type="text" name="target_stats" x-model="editData.target_stats"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Mandatory Skills (comma-separated)</label>
+                            <input type="text" name="mandatory_skills" x-model="editData.mandatory_skills"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Inherited Unique Skills (comma-separated)</label>
+                            <input type="text" name="inherited_uniques" x-model="editData.inherited_uniques"
+                                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Summary</label>
+                            <textarea name="summary" x-model="editData.summary" rows="3"
+                                      class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            Changelog Reason <span class="text-slate-500 font-normal lowercase">(recorded when tier changes)</span>
+                        </label>
+                        <input type="text" name="changelog_reason" x-model="editData.changelog_reason"
+                               placeholder="e.g. Promoted to S+ after recent balance updates"
+                               class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-3">
+                        <button type="button" @click="editModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-950/30">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+@endsection

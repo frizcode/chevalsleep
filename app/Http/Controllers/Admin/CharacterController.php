@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Character;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class CharacterController extends Controller
+{
+    /**
+     * Display a listing of the characters.
+     */
+    public function index(): View
+    {
+        $characters = Character::withCount('tierEntries')
+            ->orderBy('name')
+            ->paginate(15);
+
+        return view('admin.characters.index', [
+            'characters' => $characters,
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new character.
+     */
+    public function create(): View
+    {
+        return view('admin.characters.create', [
+            'runningStyles' => ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'],
+        ]);
+    }
+
+    /**
+     * Store a newly created character in storage.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'variant_title' => ['nullable', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:characters,slug'],
+            'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
+            'rarity' => ['required', 'integer', 'min:1', 'max:3'],
+            'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        if (empty($validated['slug'])) {
+            $baseSlug = Str::slug($validated['name'] . ($validated['variant_title'] ? '-' . $validated['variant_title'] : ''));
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Character::where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $counter++;
+            }
+            $validated['slug'] = $slug;
+        }
+
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = $validated['slug'] . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('characters', $filename, 'public');
+            $validated['avatar_webp'] = $path;
+        }
+
+        unset($validated['avatar']);
+
+        $character = Character::create($validated);
+
+        return redirect()->route('admin.characters.index')
+            ->with('status', "Character '{$character->full_name}' created successfully.");
+    }
+
+    /**
+     * Show the form for editing the specified character.
+     */
+    public function edit(Character $character): View
+    {
+        return view('admin.characters.edit', [
+            'character' => $character,
+            'runningStyles' => ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'],
+        ]);
+    }
+
+    /**
+     * Update the specified character in storage.
+     */
+    public function update(Request $request, Character $character): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'variant_title' => ['nullable', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('characters', 'slug')->ignore($character->id)],
+            'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
+            'rarity' => ['required', 'integer', 'min:1', 'max:3'],
+            'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        if (empty($validated['slug'])) {
+            $baseSlug = Str::slug($validated['name'] . ($validated['variant_title'] ? '-' . $validated['variant_title'] : ''));
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Character::where('slug', $slug)->where('id', '!=', $character->id)->exists()) {
+                $slug = $baseSlug . '-' . $counter++;
+            }
+            $validated['slug'] = $slug;
+        }
+
+        if ($request->hasFile('avatar')) {
+            if ($character->avatar_webp && Storage::disk('public')->exists($character->avatar_webp)) {
+                Storage::disk('public')->delete($character->avatar_webp);
+            }
+
+            $file = $request->file('avatar');
+            $filename = $validated['slug'] . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('characters', $filename, 'public');
+            $validated['avatar_webp'] = $path;
+        }
+
+        unset($validated['avatar']);
+
+        $character->update($validated);
+
+        return redirect()->route('admin.characters.index')
+            ->with('status', "Character '{$character->full_name}' updated successfully.");
+    }
+
+    /**
+     * Remove the specified character from storage.
+     */
+    public function destroy(Character $character): RedirectResponse
+    {
+        $name = $character->full_name;
+
+        if ($character->avatar_webp && Storage::disk('public')->exists($character->avatar_webp)) {
+            Storage::disk('public')->delete($character->avatar_webp);
+        }
+
+        $character->delete();
+
+        return redirect()->route('admin.characters.index')
+            ->with('status', "Character '{$name}' deleted successfully.");
+    }
+}

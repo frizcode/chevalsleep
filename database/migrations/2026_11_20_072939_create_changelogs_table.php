@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('changelogs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('character_id')->constrained()->cascadeOnDelete();
+            $table->string('previous_tier')->nullable();
+            $table->string('new_tier');
+            $table->text('reason');
             $table->timestamps();
         });
     }

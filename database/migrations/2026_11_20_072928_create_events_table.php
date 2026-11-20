@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->string('track_name');
+            $table->enum('distance_type', ['Sprint', 'Mile', 'Medium', 'Long']);
+            $table->unsignedSmallInteger('distance_meters');
+            $table->enum('surface', ['Turf', 'Dirt']);
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }

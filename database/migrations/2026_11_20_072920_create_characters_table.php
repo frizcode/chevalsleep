@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('characters', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('variant_title')->nullable();
+            $table->string('slug')->unique();
+            $table->string('avatar_webp')->nullable();
+            $table->enum('default_running_style', ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer']);
+            $table->unsignedTinyInteger('rarity')->default(3);
             $table->timestamps();
         });
     }
