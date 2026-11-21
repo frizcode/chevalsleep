@@ -31,6 +31,23 @@ class CmController extends Controller
     }
 
     /**
+     * Display the standalone Champions Meeting Archive page.
+     */
+    public function archive(Request $request): View
+    {
+        $events = Event::withCount('tierEntries')
+            ->orderByDesc('cm_number')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('public.cm.archive', [
+            'events' => $events,
+            'distanceTypes' => ['All', 'Sprint', 'Mile', 'Medium', 'Long'],
+            'surfaces' => ['All', 'Turf', 'Dirt'],
+        ]);
+    }
+
+    /**
      * Display the full 7-section Champions Meeting meta guide.
      */
     public function show(Event $event): View

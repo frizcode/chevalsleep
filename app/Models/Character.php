@@ -24,6 +24,7 @@ class Character extends Model
         'avatar_webp',
         'default_running_style',
         'rarity',
+        'aptitude_notes',
     ];
 
     /**
@@ -58,21 +59,29 @@ class Character extends Model
     protected function fullName(): Attribute
     {
         return Attribute::get(function (): string {
-            return $this->name . ($this->variant_title && $this->variant_title !== 'Original' ? " ({$this->variant_title})" : '');
+            if ($this->variant_title && $this->variant_title !== 'Original') {
+                return "{$this->name} ({$this->variant_title})";
+            }
+
+            return $this->name;
         });
     }
 
     /**
-     * Get the avatar URL if file exists on the public disk.
+     * Get the full public URL for the character's avatar.
      */
     protected function avatarUrl(): Attribute
     {
         return Attribute::get(function (): ?string {
-            if ($this->avatar_webp && Storage::disk('public')->exists($this->avatar_webp)) {
-                return Storage::disk('public')->url($this->avatar_webp);
+            if (! $this->avatar_webp) {
+                return null;
             }
 
-            return null;
+            if (filter_var($this->avatar_webp, FILTER_VALIDATE_URL)) {
+                return $this->avatar_webp;
+            }
+
+            return Storage::disk('public')->url($this->avatar_webp);
         });
     }
 }

@@ -21,7 +21,7 @@ class ChevalSleepTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create([
+        $this->admin = User::factory()->admin()->create([
             'email' => 'admin@chevalsleep.test',
         ]);
 
@@ -171,6 +171,100 @@ class ChevalSleepTest extends TestCase
             'previous_tier' => 'S+',
             'new_tier' => 'S',
             'reason' => 'Shifted down due to front runner dominance.',
+        ]);
+    }
+
+    public function test_language_switcher_switches_session_locale(): void
+    {
+        $response = $this->get('/lang/id');
+        $response->assertRedirect();
+        $response->assertSessionHas('locale', 'id');
+
+        $responseEn = $this->get('/lang/en');
+        $responseEn->assertRedirect();
+        $responseEn->assertSessionHas('locale', 'en');
+    }
+
+    public function test_regular_user_cannot_access_admin_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $response = $this->actingAs($user)->get('/admin');
+        $response->assertStatus(403);
+    }
+
+    public function test_user_can_bookmark_and_unbookmark_cm(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+
+        // Bookmark
+        $response = $this->actingAs($user)->post("/cm/{$this->event->slug}/bookmark");
+        $response->assertRedirect();
+        $this->assertTrue($user->fresh()->bookmarkedEvents->contains($this->event->id));
+
+        // View bookmarks
+        $viewResponse = $this->actingAs($user)->get('/my-bookmarks');
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee($this->event->title);
+
+        // Toggle / unbookmark
+        $unbookmarkResponse = $this->actingAs($user)->post("/cm/{$this->event->slug}/bookmark");
+        $unbookmarkResponse->assertRedirect();
+        $this->assertFalse($user->fresh()->bookmarkedEvents->contains($this->event->id));
+    }
+
+    public function test_public_guides_pages_are_accessible(): void
+    {
+        $this->get('/guides/umas')->assertStatus(200);
+        $this->get('/guides/skills')->assertStatus(200);
+        $this->get('/guides/supoka')->assertStatus(200);
+        $this->get('/cm-archive')->assertStatus(200);
+    }
+
+    public function test_user_can_access_custom_profile_page(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $response = $this->actingAs($user)->get('/profile');
+        $response->assertStatus(200);
+        $response->assertSee($user->email);
+        $response->assertSee('CHEVAL');
+    }
+
+    public function test_admin_can_create_skill_and_support_card(): void
+    {
+        // 1. Create skill
+        $skillResponse = $this->actingAs($this->admin)->post('/admin/skills', [
+            'name' => 'Professor of Curvature',
+            'slug' => 'professor-of-curvature',
+            'rarity' => 'Rare',
+            'skill_type' => 'Velocity',
+            'running_style' => 'Universal',
+            'distance_type' => 'Universal',
+            'activation_condition' => 'Any corner',
+            'description' => 'Velocity boost on corners.',
+        ]);
+
+        $skillResponse->assertRedirect(route('admin.skills.index'));
+        $this->assertDatabaseHas('skills', [
+            'name' => 'Professor of Curvature',
+            'rarity' => 'Rare',
+        ]);
+
+        // 2. Create support card
+        $cardResponse = $this->actingAs($this->admin)->post('/admin/support-cards', [
+            'name' => 'Kitasan Black',
+            'epithet' => 'Fire at My Heels',
+            'slug' => 'ssr-kitasan-black',
+            'rarity' => 'SSR',
+            'card_type' => 'Speed',
+            'specialty_priority' => 80,
+            'key_skills' => 'Professor of Curvature, Corner Specialist',
+            'summary' => 'Premier speed card.',
+        ]);
+
+        $cardResponse->assertRedirect(route('admin.support-cards.index'));
+        $this->assertDatabaseHas('support_cards', [
+            'name' => 'Kitasan Black',
+            'rarity' => 'SSR',
         ]);
     }
 }

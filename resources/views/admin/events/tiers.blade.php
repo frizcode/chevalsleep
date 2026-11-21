@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Tier Builder &bull; ' . $event->title)
+
 @section('content')
 <div x-data="{
     // Filter within workspace
@@ -8,7 +10,7 @@
     // Add Form Live Preview State
     characters: {{ json_encode($characters) }},
     addCharacterId: '{{ old('character_id', '') }}',
-    addTierRank: '{{ old('tier_rank', 'S') }}',
+    addTierRank: '{{ old('tier_rank', 'SS') }}',
     addRole: '{{ old('role', 'Ace') }}',
     addStyle: '{{ old('recommended_style', 'Front Runner') }}',
     addStats: '{{ old('target_stats', '') }}',
@@ -29,7 +31,7 @@
     editData: {
         id: null,
         character_name: '',
-        tier_rank: 'S',
+        tier_rank: 'SS',
         role: 'Ace',
         recommended_style: 'Front Runner',
         sort_order: 0,
@@ -45,7 +47,7 @@
         this.editData.character_name = entry.character ? (entry.character.name + (entry.character.variant_title && entry.character.variant_title !== 'Original' ? ' (' + entry.character.variant_title + ')' : '')) : 'Character';
         this.editData.tier_rank = entry.tier_rank;
         this.editData.role = entry.role;
-        this.editData.recommended_style = entry.recommended_style;
+        this.editData.recommended_style = entry.recommended_style || entry.running_style || 'Front Runner';
         this.editData.sort_order = entry.sort_order || 0;
         
         let notes = entry.build_notes || {};
@@ -60,36 +62,36 @@
 }" class="space-y-6">
 
     <!-- Workspace Header & Meta Context -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-sail-200 dark:border-navy-700">
         <div>
-            <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
+            <div class="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-brass-500 mb-1 font-mono">
                 <span>Tier List Workspace</span>
                 <span>&bull;</span>
-                <span class="{{ $event->surface === 'Turf' ? 'text-emerald-400' : 'text-amber-400' }}">{{ $event->surface }}</span>
+                <span class="{{ $event->surface === 'Turf' ? 'text-emerald-500' : 'text-brass-500' }}">{{ $event->surface }}</span>
                 <span>&bull;</span>
                 <span>{{ $event->distance_type }} ({{ $event->distance_meters }}m)</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center space-x-3">
+            <h1 class="text-2xl sm:text-3xl font-black text-navy-900 dark:text-sail-50 tracking-tight font-sans flex items-center space-x-3">
                 <span>{{ $event->title }}</span>
                 @if ($event->is_active)
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                        Active
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                        LIVE
                     </span>
                 @endif
             </h1>
-            <p class="text-xs text-slate-400 mt-0.5">Racecourse: <strong class="text-slate-200">{{ $event->track_name }}</strong></p>
+            <p class="text-xs text-sail-500 dark:text-sail-400 mt-0.5">Racecourse: <strong class="text-navy-900 dark:text-sail-100">{{ $event->track_name }}</strong></p>
         </div>
 
-        <div class="flex items-center space-x-3">
-            <a href="{{ route('home', ['event' => $event->slug]) }}" target="_blank"
-               class="px-3.5 py-2 rounded-2xl text-xs font-bold bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition-all inline-flex items-center space-x-1.5 shadow-sm">
-                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center space-x-2">
+            <a href="{{ route('cm.show', $event) }}" target="_blank"
+               class="px-3 py-1.5 rounded-md text-xs font-semibold bg-sail-100 dark:bg-navy-700 hover:bg-sail-200 dark:hover:bg-navy-600 text-sail-700 dark:text-sail-200 border border-sail-200 dark:border-navy-600 transition-colors inline-flex items-center space-x-1.5 shadow-sm">
+                <svg class="w-3.5 h-3.5 text-brass-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
-                <span>Preview Public Page</span>
+                <span>View Public Guide</span>
             </a>
-            <a href="{{ route('admin.events.index') }}" class="px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white transition-colors">
+            <a href="{{ route('admin.events.index') }}" class="px-3 py-1.5 rounded-md text-xs font-semibold text-sail-500 hover:text-navy-900 dark:hover:text-sail-100 transition-colors">
                 &larr; Back to Events
             </a>
         </div>
@@ -99,13 +101,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Left: Tier List Workspace (7 Cols) -->
-        <div class="lg:col-span-7 space-y-6">
+        <div class="lg:col-span-7 space-y-4">
             <!-- Search Inside Tier List Workspace -->
             <div class="relative">
                 <input type="text" x-model="listSearch"
                        placeholder="Filter racers in this workspace by name..."
-                       class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                       class="w-full bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md pl-9 pr-3.5 py-1.5 text-xs text-navy-900 dark:text-sail-100 placeholder-sail-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sail-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -113,12 +115,13 @@
             </div>
 
             @php
-                $tierColors = [
-                    'S+' => 'bg-gradient-to-r from-rose-600 to-amber-500 text-white font-black',
-                    'S'  => 'bg-amber-500 text-slate-950 font-black',
-                    'A'  => 'bg-violet-600 text-white font-bold',
-                    'B'  => 'bg-sky-600 text-white font-bold',
-                    'C'  => 'bg-slate-700 text-slate-200 font-semibold',
+                $tierBadgeStyles = [
+                    'SS' => 'bg-brass-500 text-navy-950 font-black font-mono',
+                    'S+' => 'bg-brass-600 text-white font-black font-mono',
+                    'S'  => 'bg-navy-700 text-brass-400 border border-brass-500/40 font-bold font-mono',
+                    'A'  => 'bg-cerulean-600 text-white font-bold font-mono',
+                    'B'  => 'bg-sail-200 dark:bg-navy-700 text-sail-700 dark:text-sail-300 font-semibold font-mono',
+                    'C'  => 'bg-sail-100 dark:bg-navy-750 text-sail-500 dark:text-sail-400 font-medium font-mono',
                 ];
             @endphp
 
@@ -126,66 +129,68 @@
                 @php
                     $entries = $groupedEntries[$rank] ?? collect();
                 @endphp
-                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+                <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg overflow-hidden shadow-sm">
                     <!-- Tier Header -->
-                    <div class="p-3.5 px-5 bg-slate-950/70 border-b border-slate-800 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-10 h-8 rounded-xl flex items-center justify-center text-sm shadow-sm {{ $tierColors[$rank] ?? 'bg-slate-800' }}">
+                    <div class="p-2.5 px-4 bg-sail-50 dark:bg-navy-900/60 border-b border-sail-200 dark:border-navy-700 flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="w-8 h-6 rounded flex items-center justify-center text-xs {{ $tierBadgeStyles[$rank] ?? 'bg-navy-700 text-sail-200 font-mono' }}">
                                 {{ $rank }}
                             </span>
-                            <span class="text-xs uppercase font-black tracking-wider text-slate-300">
+                            <span class="text-xs uppercase font-bold tracking-wider text-navy-900 dark:text-sail-100 font-mono">
                                 Tier {{ $rank }}
                             </span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500">
+                        <span class="text-xs font-mono tabular-nums text-sail-400">
                             {{ $entries->count() }} {{ Str::plural('entry', $entries->count()) }}
                         </span>
                     </div>
 
                     <!-- Entries in this Tier -->
-                    <div class="divide-y divide-slate-800/80">
+                    <div class="divide-y divide-sail-100 dark:divide-navy-750">
                         @forelse ($entries as $entry)
                             <div x-show="listSearch === '' || '{{ strtolower($entry->character?->full_name ?? '') }}'.includes(listSearch.toLowerCase())"
-                                 class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/40 transition-colors">
+                                 class="p-3 px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-sail-50/60 dark:hover:bg-navy-750/40 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <!-- Avatar / Fallback -->
-                                    @if ($entry->character?->avatar_url)
-                                        <img src="{{ $entry->character->avatar_url }}" alt="{{ $entry->character->name }}"
-                                             class="w-11 h-11 rounded-xl object-cover border border-slate-700 bg-slate-950 flex-shrink-0">
-                                    @else
-                                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-black text-xs text-amber-400 flex-shrink-0">
-                                            {{ strtoupper(substr($entry->character?->name ?? 'UM', 0, 2)) }}
-                                        </div>
-                                    @endif
+                                    <div class="w-9 h-9 rounded-md overflow-hidden bg-sail-100 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 flex items-center justify-center flex-shrink-0">
+                                        @if ($entry->character?->avatar_url)
+                                            <img src="{{ $entry->character->avatar_url }}" alt="{{ $entry->character->name }}"
+                                                 class="w-full h-full object-cover">
+                                        @else
+                                            <span class="font-bold text-brass-500 text-xs font-mono">
+                                                {{ strtoupper(substr($entry->character?->name ?? 'UM', 0, 2)) }}
+                                            </span>
+                                        @endif
+                                    </div>
 
-                                    <div class="space-y-1">
+                                    <div class="space-y-0.5">
                                         <div class="flex items-center space-x-2">
-                                            <span class="font-extrabold text-white text-sm">
+                                            <span class="font-bold text-navy-900 dark:text-sail-100 text-xs">
                                                 {{ $entry->character?->full_name ?? 'Unknown Character' }}
                                             </span>
-                                            <span class="text-[10px] text-slate-500 font-mono">#{{ $entry->sort_order }}</span>
+                                            <span class="text-[10px] text-sail-400 font-mono">#{{ $entry->sort_order }}</span>
                                         </div>
 
                                         <div class="flex flex-wrap items-center gap-1.5">
                                             <!-- Role Badge -->
                                             @php
                                                 $roleClasses = [
-                                                    'Ace' => 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-                                                    'Parent' => 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-                                                    'Debuffer' => 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30',
+                                                    'Ace' => 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30',
+                                                    'Parent' => 'bg-cerulean-500/10 text-cerulean-600 dark:text-cerulean-400 border-cerulean-500/30',
+                                                    'Debuffer' => 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30',
                                                 ];
                                             @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ $roleClasses[$entry->role] ?? 'bg-slate-800' }}">
+                                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold border {{ $roleClasses[$entry->role] ?? 'bg-sail-100 dark:bg-navy-700' }}">
                                                 {{ $entry->role }}
                                             </span>
 
                                             <!-- Style Pill -->
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-                                                {{ $entry->recommended_style }}
+                                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sail-100 dark:bg-navy-700 text-sail-600 dark:text-sail-300 border border-sail-200 dark:border-navy-600">
+                                                {{ $entry->recommended_style ?? $entry->running_style }}
                                             </span>
 
                                             @if (!empty($entry->build_notes['target_stats']))
-                                                <span class="text-[10px] text-slate-400 font-mono hidden sm:inline truncate max-w-[180px]" title="Target Stats">
+                                                <span class="text-[10px] text-sail-400 font-mono hidden sm:inline truncate max-w-[180px] tabular-nums" title="Target Stats">
                                                     {{ $entry->build_notes['target_stats'] }}
                                                 </span>
                                             @endif
@@ -194,10 +199,10 @@
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex items-center space-x-2 self-end sm:self-center flex-shrink-0">
+                                <div class="flex items-center space-x-1.5 self-end sm:self-center flex-shrink-0">
                                     <button type="button"
                                             @click="openEdit({{ json_encode($entry) }})"
-                                            class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors">
+                                            class="px-2 py-1 rounded-md text-xs font-semibold bg-sail-100 dark:bg-navy-700 hover:bg-sail-200 dark:hover:bg-navy-600 text-sail-700 dark:text-sail-200 border border-sail-200 dark:border-navy-600 transition-colors">
                                         Edit
                                     </button>
 
@@ -206,9 +211,9 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="p-1 rounded-xl text-rose-400 hover:text-rose-200 hover:bg-rose-950/40 transition-colors"
+                                                class="p-1 rounded-md text-rose-400 hover:text-rose-600 hover:bg-rose-500/10 transition-colors"
                                                 title="Remove Entry">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
@@ -216,7 +221,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="p-4 text-center text-xs text-slate-500 italic">
+                            <div class="p-3 text-center text-xs text-sail-400 italic">
                                 No characters currently in {{ $rank }} tier.
                             </div>
                         @endforelse
@@ -229,32 +234,37 @@
         <div class="lg:col-span-5 sticky top-20 space-y-4">
             
             <!-- Live Card Preview -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-lg">
-                <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Live Public Preview</span>
+            <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-3.5 shadow-sm">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-sail-400 mb-2 font-mono">Live Public Preview</span>
                 
-                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-xs shadow-inner flex-shrink-0">
-                        <span x-text="getSelectedCharacter() ? getSelectedCharacter().name.substring(0, 2).toUpperCase() : 'UM'"></span>
+                <div class="bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md p-3 flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-md bg-white dark:bg-navy-950 border border-sail-200 dark:border-navy-700 flex items-center justify-center font-bold text-brass-500 text-xs flex-shrink-0 overflow-hidden font-mono">
+                        <template x-if="getSelectedCharacter() && getSelectedCharacter().avatar_url">
+                            <img :src="getSelectedCharacter().avatar_url" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!getSelectedCharacter() || !getSelectedCharacter().avatar_url">
+                            <span x-text="getSelectedCharacter() ? getSelectedCharacter().name.substring(0, 2).toUpperCase() : 'UM'"></span>
+                        </template>
                     </div>
 
-                    <div class="min-w-0 flex-1 space-y-1">
+                    <div class="min-w-0 flex-1 space-y-0.5">
                         <div class="flex items-center space-x-1.5">
-                            <span class="font-bold text-sm text-white truncate"
+                            <span class="font-bold text-xs text-navy-900 dark:text-sail-100 truncate"
                                   x-text="getSelectedCharacter() ? getSelectedCharacter().name : 'Select a Character'"></span>
-                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold font-mono bg-brass-500/10 text-brass-600 dark:text-brass-400 border border-brass-500/30"
                                   x-text="'Tier ' + addTierRank"></span>
                         </div>
                         
                         <div class="flex items-center gap-1.5 text-[10px]">
-                            <span class="px-1.5 py-0.5 rounded font-bold"
+                            <span class="px-1.5 py-0.2 rounded font-semibold border"
                                   :class="{
-                                      'bg-rose-500/10 text-rose-400 border border-rose-500/30': addRole === 'Ace',
-                                      'bg-blue-500/10 text-blue-400 border border-blue-500/30': addRole === 'Parent',
-                                      'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/30': addRole === 'Debuffer'
+                                      'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30': addRole === 'Ace',
+                                      'bg-cerulean-500/10 text-cerulean-600 dark:text-cerulean-400 border-cerulean-500/30': addRole === 'Parent',
+                                      'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30': addRole === 'Debuffer'
                                   }"
                                   x-text="addRole"></span>
                             
-                            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                            <span class="px-1.5 py-0.2 rounded bg-sail-100 dark:bg-navy-700 text-sail-600 dark:text-sail-300 border border-sail-200 dark:border-navy-600"
                                   x-text="addStyle"></span>
                         </div>
                     </div>
@@ -262,26 +272,30 @@
             </div>
 
             <!-- Add Form Container -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-5">
-                <div class="border-b border-slate-800 pb-3">
-                    <h2 class="text-base font-black text-white flex items-center space-x-2">
-                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-4 sm:p-5 shadow-sm space-y-4">
+                <div class="border-b border-sail-200 dark:border-navy-750 pb-2.5">
+                    <h2 class="text-sm font-bold text-navy-900 dark:text-sail-100 flex items-center space-x-1.5 font-sans">
+                        <svg class="w-4 h-4 text-brass-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         <span>Add Racer to Tier List</span>
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Assign tier ranking, competitive role, and target stats.</p>
+                    <p class="text-[11px] text-sail-400 mt-0.5">Assign tier ranking, competitive role, and target stats.</p>
                 </div>
 
-                <form method="POST" action="{{ route('admin.events.tiers.store', $event) }}" class="space-y-4">
+                @php
+                    $inp = 'w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md px-3 py-1.5 text-xs text-navy-900 dark:text-sail-100 placeholder-sail-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors';
+                @endphp
+
+                <form method="POST" action="{{ route('admin.events.tiers.store', $event) }}" class="space-y-3">
                     @csrf
 
                     <div>
-                        <label for="character_id" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                            Character <span class="text-rose-400">*</span>
+                        <label for="character_id" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                            Character <span class="text-rose-500">*</span>
                         </label>
                         <select id="character_id" name="character_id" required x-model="addCharacterId"
-                                class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                                class="{{ $inp }}">
                             <option value="">-- Choose Character --</option>
                             @foreach ($characters as $character)
                                 <option value="{{ $character->id }}">
@@ -291,13 +305,13 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label for="tier_rank" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Tier Rank <span class="text-rose-400">*</span>
+                            <label for="tier_rank" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Tier Rank <span class="text-rose-500">*</span>
                             </label>
                             <select id="tier_rank" name="tier_rank" required x-model="addTierRank"
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($tierRanks as $rank)
                                     <option value="{{ $rank }}">Tier {{ $rank }}</option>
                                 @endforeach
@@ -305,11 +319,11 @@
                         </div>
 
                         <div>
-                            <label for="role" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Role <span class="text-rose-400">*</span>
+                            <label for="role" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Role <span class="text-rose-500">*</span>
                             </label>
                             <select id="role" name="role" required x-model="addRole"
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($roles as $role)
                                     <option value="{{ $role }}">{{ $role }}</option>
                                 @endforeach
@@ -317,13 +331,13 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label for="recommended_style" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Recommended Style <span class="text-rose-400">*</span>
+                            <label for="recommended_style" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Recommended Style <span class="text-rose-500">*</span>
                             </label>
                             <select id="recommended_style" name="recommended_style" required x-model="addStyle"
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($runningStyles as $style)
                                     <option value="{{ $style }}">{{ $style }}</option>
                                 @endforeach
@@ -331,76 +345,76 @@
                         </div>
 
                         <div>
-                            <label for="sort_order" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            <label for="sort_order" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
                                 Sort Order
                             </label>
                             <input type="number" id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }} font-mono">
                         </div>
                     </div>
 
                     <!-- Build Notes Inputs -->
-                    <div class="pt-2 border-t border-slate-800 space-y-3">
-                        <span class="block text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+                    <div class="pt-2 border-t border-sail-200 dark:border-navy-750 space-y-2.5">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-brass-500 font-mono">
                             Build Notes & Recommendations
                         </span>
 
                         <div>
-                            <label for="target_stats" class="block text-xs font-medium text-slate-300 mb-1">
+                            <label for="target_stats" class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">
                                 Target Stats (Spd / Stm / Pwr / Guts / Wit)
                             </label>
                             <input type="text" id="target_stats" name="target_stats" x-model="addStats"
                                    placeholder="e.g. 1200 / 600+ / 1100+ / 450+ / 1000+"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                                   class="{{ $inp }} font-mono">
                         </div>
 
                         <div>
-                            <label for="mandatory_skills" class="block text-xs font-medium text-slate-300 mb-1">
-                                Mandatory Skills <span class="text-slate-500 text-[10px]">(comma-separated)</span>
+                            <label for="mandatory_skills" class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">
+                                Mandatory Skills <span class="text-sail-400 text-[10px]">(comma-separated)</span>
                             </label>
                             <input type="text" id="mandatory_skills" name="mandatory_skills" x-model="addSkills"
                                    placeholder="e.g. Groundwork, Escape Artist, Dirt Corner◯"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }}">
                             
                             <!-- Mini chip preview -->
                             <div class="flex flex-wrap gap-1 mt-1.5" x-show="getSkillPills(addSkills).length > 0">
                                 <template x-for="skill in getSkillPills(addSkills)" :key="skill">
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700" x-text="skill"></span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] bg-sail-100 dark:bg-navy-700 text-sail-600 dark:text-sail-300 border border-sail-200 dark:border-navy-600" x-text="skill"></span>
                                 </template>
                             </div>
                         </div>
 
                         <div>
-                            <label for="inherited_uniques" class="block text-xs font-medium text-slate-300 mb-1">
-                                Inherited Unique Skills <span class="text-slate-500 text-[10px]">(comma-separated)</span>
+                            <label for="inherited_uniques" class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">
+                                Inherited Unique Skills <span class="text-sail-400 text-[10px]">(comma-separated)</span>
                             </label>
                             <input type="text" id="inherited_uniques" name="inherited_uniques" value="{{ old('inherited_uniques') }}"
                                    placeholder="e.g. Angling x Scheming, Shooting for Victory!"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }}">
                         </div>
 
                         <div>
-                            <label for="summary" class="block text-xs font-medium text-slate-300 mb-1">
+                            <label for="summary" class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">
                                 Meta Analysis Summary
                             </label>
-                            <textarea id="summary" name="summary" rows="3"
+                            <textarea id="summary" name="summary" rows="2"
                                       placeholder="Summary of track viability, strengths, and role synergy..."
-                                      class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">{{ old('summary') }}</textarea>
+                                      class="{{ $inp }}">{{ old('summary') }}</textarea>
                         </div>
                     </div>
 
                     <!-- Changelog Recording -->
-                    <div class="pt-2 border-t border-slate-800">
-                        <label for="changelog_reason" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                            Changelog Reason <span class="text-slate-500 font-normal lowercase">(optional audit note)</span>
+                    <div class="pt-2 border-t border-sail-200 dark:border-navy-750">
+                        <label for="changelog_reason" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                            Changelog Reason <span class="text-sail-400 font-normal lowercase">(optional audit note)</span>
                         </label>
                         <input type="text" id="changelog_reason" name="changelog_reason" value="{{ old('changelog_reason') }}"
-                               placeholder="e.g. Placed into S+ tier due to high acceleration consistency"
-                               class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                               placeholder="e.g. Placed into SS tier due to high acceleration consistency"
+                               class="{{ $inp }}">
                     </div>
 
                     <button type="submit"
-                            class="w-full py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-950/30 transition-all">
+                            class="w-full py-2 rounded-md text-xs font-semibold uppercase tracking-wider bg-brass-500 hover:bg-brass-400 text-navy-950 transition-colors shadow-sm">
                         + Add To Tier List
                     </button>
                 </form>
@@ -412,32 +426,32 @@
     <div x-show="editModalOpen" x-cloak
          class="fixed inset-0 z-50 overflow-y-auto"
          role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+        <div class="fixed inset-0 bg-navy-950/70 backdrop-blur-sm transition-opacity"
              @click="editModalOpen = false"></div>
 
         <div class="flex min-h-screen items-center justify-center p-4">
-            <div class="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-slate-200"
+            <div class="relative w-full max-w-xl bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-5 sm:p-6 shadow-2xl space-y-4 text-sail-700 dark:text-sail-200"
                  @keydown.escape.window="editModalOpen = false">
                 
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center justify-between border-b border-sail-200 dark:border-navy-750 pb-2.5">
                     <div>
-                        <h3 class="text-lg font-black text-white">Edit Tier Entry</h3>
-                        <p class="text-xs text-amber-400 font-bold" x-text="editData.character_name"></p>
+                        <h3 class="text-base font-bold text-navy-900 dark:text-sail-100 font-sans">Edit Tier Entry</h3>
+                        <p class="text-xs text-brass-500 font-semibold" x-text="editData.character_name"></p>
                     </div>
-                    <button type="button" @click="editModalOpen = false" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+                    <button type="button" @click="editModalOpen = false" class="text-sail-400 hover:text-navy-900 dark:hover:text-sail-100 text-lg font-bold">&times;</button>
                 </div>
 
-                <form :action="editData.action_url" method="POST" class="space-y-4">
+                <form :action="editData.action_url" method="POST" class="space-y-3">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Tier Rank <span class="text-rose-400">*</span>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Tier Rank <span class="text-rose-500">*</span>
                             </label>
                             <select name="tier_rank" x-model="editData.tier_rank" required
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($tierRanks as $rank)
                                     <option value="{{ $rank }}">Tier {{ $rank }}</option>
                                 @endforeach
@@ -445,11 +459,11 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Role <span class="text-rose-400">*</span>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Role <span class="text-rose-500">*</span>
                             </label>
                             <select name="role" x-model="editData.role" required
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($roles as $role)
                                     <option value="{{ $role }}">{{ $role }}</option>
                                 @endforeach
@@ -457,13 +471,13 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                                Recommended Style <span class="text-rose-400">*</span>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                                Recommended Style <span class="text-rose-500">*</span>
                             </label>
                             <select name="recommended_style" x-model="editData.recommended_style" required
-                                    class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                    class="{{ $inp }}">
                                 @foreach ($runningStyles as $style)
                                     <option value="{{ $style }}">{{ $style }}</option>
                                 @endforeach
@@ -471,59 +485,59 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
                                 Sort Order
                             </label>
                             <input type="number" name="sort_order" x-model="editData.sort_order" min="0"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }} font-mono">
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-slate-800 space-y-3">
-                        <span class="block text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+                    <div class="pt-2 border-t border-sail-200 dark:border-navy-750 space-y-2.5">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-brass-500 font-mono">
                             Build Notes
                         </span>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Target Stats</label>
+                            <label class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">Target Stats</label>
                             <input type="text" name="target_stats" x-model="editData.target_stats"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                                   class="{{ $inp }} font-mono">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Mandatory Skills (comma-separated)</label>
+                            <label class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">Mandatory Skills (comma-separated)</label>
                             <input type="text" name="mandatory_skills" x-model="editData.mandatory_skills"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }}">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Inherited Unique Skills (comma-separated)</label>
+                            <label class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">Inherited Unique Skills (comma-separated)</label>
                             <input type="text" name="inherited_uniques" x-model="editData.inherited_uniques"
-                                   class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                                   class="{{ $inp }}">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Summary</label>
-                            <textarea name="summary" x-model="editData.summary" rows="3"
-                                      class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+                            <label class="block text-xs font-medium text-sail-600 dark:text-sail-300 mb-1">Summary</label>
+                            <textarea name="summary" x-model="editData.summary" rows="2"
+                                      class="{{ $inp }}"></textarea>
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-slate-800">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                            Changelog Reason <span class="text-slate-500 font-normal lowercase">(recorded when tier changes)</span>
+                    <div class="pt-2 border-t border-sail-200 dark:border-navy-750">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1 font-mono">
+                            Changelog Reason <span class="text-sail-400 font-normal lowercase">(recorded when tier changes)</span>
                         </label>
                         <input type="text" name="changelog_reason" x-model="editData.changelog_reason"
-                               placeholder="e.g. Promoted to S+ after recent balance updates"
-                               class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                               placeholder="e.g. Promoted to SS after recent balance updates"
+                               class="{{ $inp }}">
                     </div>
 
-                    <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-3">
-                        <button type="button" @click="editModalOpen = false" class="px-4 py-2 rounded-2xl text-xs font-semibold text-slate-400 hover:text-white">
+                    <div class="pt-3 border-t border-sail-200 dark:border-navy-750 flex items-center justify-end space-x-2">
+                        <button type="button" @click="editModalOpen = false" class="px-3 py-1.5 rounded-md text-xs font-semibold text-sail-500 hover:text-navy-900 dark:hover:text-sail-100 transition-colors">
                             Cancel
                         </button>
                         <button type="submit"
-                                class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-950/30">
+                                class="px-4 py-1.5 rounded-md text-xs font-semibold bg-brass-500 hover:bg-brass-400 text-navy-950 transition-colors shadow-sm">
                             Save Changes
                         </button>
                     </div>

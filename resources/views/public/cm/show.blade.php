@@ -68,321 +68,300 @@
         navigator.clipboard.writeText(window.location.href);
         this.copiedToast = true;
         setTimeout(() => { this.copiedToast = false; }, 2500);
-    },
-
-    resolveAssetUrl(icon) {
-        if (!icon) return null;
-        if (icon.startsWith('http://') || icon.startsWith('https://')) return icon;
-        return '/storage/' + icon.replace(/^\/+/, '');
     }
 }"
 @keydown.window.escape="closeModal()"
 @keydown.window.slash.prevent="$refs.searchInput.focus()"
-class="space-y-12">
+class="space-y-8">
 
     <!-- Toast Feedback for Copy Link -->
     <div x-show="copiedToast" x-cloak
-         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0 -translate-y-2"
          x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave="transition ease-in duration-100"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="fixed bottom-6 right-6 z-50 bg-amber-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2 text-xs">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         class="fixed bottom-6 right-6 z-50 bg-navy-950 text-brass-400 font-mono text-xs px-4 py-2 rounded-md border border-brass-500/50 shadow-lg flex items-center space-x-2">
+        <svg class="w-4 h-4 text-brass-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
-        <span>Tournament meta link copied to clipboard!</span>
+        <span>Link copied to clipboard</span>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 1: CM Header & Track Conditions   -->
-    <!-- ========================================== -->
-    <section class="relative overflow-hidden rounded-3xl bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 p-6 sm:p-9 shadow-xl transition-colors duration-200">
-        <!-- Glows -->
-        <div class="absolute -right-20 -top-20 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute right-48 -bottom-24 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- ============================================================= -->
+    <!-- SECTION 1: CM Header & Race Telemetry Strip                  -->
+    <!-- ============================================================= -->
+    <section class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-5 shadow-sm">
+        <!-- Top Toolbar: Breadcrumb + Switcher & Share -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-sail-200 dark:border-navy-700 text-xs font-mono">
+            <div class="flex items-center space-x-2 text-slate-500 dark:text-slate-400">
+                <a href="{{ route('home') }}" class="hover:text-brass-500 transition-colors flex items-center space-x-1">
+                    <span>&larr; ARCHIVE</span>
+                </a>
+                <span>/</span>
+                <span class="text-navy-950 dark:text-slate-200 font-bold uppercase">{{ $event->title }}</span>
+            </div>
 
-        <div class="relative z-10 space-y-6">
-            <!-- Top bar: Back breadcrumb + Switcher & Actions -->
-            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-sky-100 dark:border-sky-900/40 pb-4">
-                <div class="flex items-center space-x-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <a href="{{ route('home') }}" class="hover:text-sky-600 dark:hover:text-amber-400 transition-colors flex items-center space-x-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <div class="flex items-center space-x-2">
+                <!-- Tournament Switcher Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" type="button"
+                            class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-sail-100 dark:bg-navy-750 text-slate-700 dark:text-slate-200 border border-sail-200 dark:border-navy-700 hover:border-brass-500 transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $event->is_active ? 'bg-emerald-400' : 'bg-slate-400' }}"></span>
+                        <span class="truncate max-w-[140px]">Switch Event</span>
+                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                        <span>CM Archive</span>
-                    </a>
-                    <span>/</span>
-                    <span class="text-slate-800 dark:text-slate-200 font-bold">{{ $event->title }}</span>
-                </div>
+                    </button>
 
-                <!-- Event Switcher Dropdown & Share Button -->
-                <div class="flex items-center space-x-3">
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" type="button"
-                                class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-sky-500 transition-all">
-                            <span class="w-2 h-2 rounded-full {{ $event->is_active ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-400' }}"></span>
-                            <span class="max-w-[140px] truncate">Switch Tournament</span>
-                            <svg class="w-3.5 h-3.5 text-slate-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                    <div x-show="open" @click.away="open = false" x-cloak
+                         class="absolute right-0 mt-1 w-64 bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md shadow-xl py-1 z-50 text-xs font-sans">
+                        <!-- Live Section -->
+                        <div class="px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-sail-100/60 dark:bg-navy-900/60 border-b border-sail-200 dark:border-navy-700 flex items-center space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>{{ __('ui.cm.ongoing_cm') }}</span>
+                        </div>
+                        <div class="divide-y divide-sail-100 dark:divide-navy-700/50">
+                            @foreach ($allEvents->where('is_active', true) as $ev)
+                                <a href="{{ route('cm.show', $ev) }}"
+                                   class="block px-3 py-2 hover:bg-sail-100 dark:hover:bg-navy-750 transition-colors {{ $ev->id === $event->id ? 'bg-sail-100/70 dark:bg-navy-750 text-brass-500 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="truncate">{{ $ev->title }}</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold uppercase">LIVE</span>
+                                    </div>
+                                    <div class="text-[10px] font-mono text-slate-400 mt-0.5">{{ $ev->track_name }} &bull; {{ $ev->distance_meters }}m</div>
+                                </a>
+                            @endforeach
+                        </div>
 
-                        <div x-show="open" @click.away="open = false" x-cloak
-                             class="absolute right-0 mt-2 w-72 bg-white dark:bg-[#11192E] border border-sky-100 dark:border-sky-900/60 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden text-xs">
-                            <div class="px-4 py-1.5 font-bold uppercase tracking-wider text-slate-400 text-[10px] border-b border-sky-100 dark:border-sky-900/40">
-                                All Tournaments
-                            </div>
-                            <div class="max-h-60 overflow-y-auto divide-y divide-sky-100 dark:divide-sky-900/30">
-                                @foreach ($allEvents as $ev)
-                                    <a href="{{ route('cm.show', $ev) }}"
-                                       class="block px-4 py-2 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors {{ $ev->id === $event->id ? 'bg-sky-50/70 dark:bg-sky-950/40 text-sky-700 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
-                                        <div class="flex items-center justify-between">
-                                            <span class="truncate">{{ $ev->title }}</span>
-                                            @if ($ev->is_active)
-                                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold uppercase">Live</span>
-                                            @endif
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
+                        <!-- Past Section -->
+                        <div class="px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-sail-100/60 dark:bg-navy-900/60 border-t border-b border-sail-200 dark:border-navy-700">
+                            {{ __('ui.cm.past_cm') }}
+                        </div>
+                        <div class="max-h-52 overflow-y-auto divide-y divide-sail-100 dark:divide-navy-700/50">
+                            @foreach ($allEvents->where('is_active', false) as $ev)
+                                <a href="{{ route('cm.show', $ev) }}"
+                                   class="block px-3 py-2 hover:bg-sail-100 dark:hover:bg-navy-750 transition-colors {{ $ev->id === $event->id ? 'bg-sail-100/70 dark:bg-navy-750 text-brass-500 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="truncate">{{ $ev->title }}</span>
+                                        <span class="text-[9px] font-mono text-slate-400">{{ $ev->distance_type }}</span>
+                                    </div>
+                                    <div class="text-[10px] font-mono text-slate-400 mt-0.5">{{ $ev->track_name }} &bull; {{ $ev->surface }}</div>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
-
-                    <button @click="copyShareLink()" type="button"
-                            class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold transition-all flex items-center space-x-1.5"
-                            title="Share CM Meta Link">
-                        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
-                        <span>Share</span>
-                    </button>
                 </div>
+
+                @auth
+                    <!-- Bookmark Button -->
+                    <form method="POST" action="{{ route('cm.bookmark', $event) }}" class="inline">
+                        @csrf
+                        <button type="submit"
+                                class="px-2.5 py-1 rounded {{ $event->isBookmarkedBy(auth()->user()) ? 'bg-brass-500 text-navy-950 font-bold border-brass-500' : 'bg-sail-100 dark:bg-navy-750 text-slate-700 dark:text-slate-200 border-sail-200 dark:border-navy-700 hover:border-brass-500' }} border transition-colors inline-flex items-center space-x-1"
+                                title="{{ $event->isBookmarkedBy(auth()->user()) ? __('ui.cm.bookmarked') : __('ui.cm.bookmark_this') }}">
+                            <svg class="w-3 h-3 {{ $event->isBookmarkedBy(auth()->user()) ? 'fill-current text-navy-950' : 'text-brass-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                            <span>{{ $event->isBookmarkedBy(auth()->user()) ? __('ui.cm.bookmarked') : __('ui.cm.bookmark_this') }}</span>
+                        </button>
+                    </form>
+                @endauth
+
+                <!-- Share Button -->
+                <button @click="copyShareLink()" type="button"
+                        class="px-2.5 py-1 rounded bg-sail-100 dark:bg-navy-750 text-slate-700 dark:text-slate-200 border border-sail-200 dark:border-navy-700 hover:border-brass-500 transition-colors inline-flex items-center space-x-1"
+                        title="Copy CM Meta Link">
+                    <svg class="w-3 h-3 text-brass-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span>SHARE</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Title Block -->
+        <div class="pt-4">
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                @if ($event->cm_number)
+                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-brass-500/15 text-brass-600 dark:text-brass-400 border border-brass-500/30 uppercase">
+                        CM #{{ $event->cm_number }}
+                    </span>
+                @endif
+                @if ($event->is_active)
+                    <span class="inline-flex items-center space-x-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>LIVE PROTOCOL ACTIVE</span>
+                    </span>
+                @else
+                    <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-sail-100 dark:bg-navy-750 text-slate-500 dark:text-slate-400 border border-sail-200 dark:border-navy-700 uppercase">
+                        ARCHIVE PROTOCOL
+                    </span>
+                @endif
+
+                @if ($event->event_date)
+                    <span class="text-[11px] font-mono text-slate-400">
+                        &bull; {{ $event->event_date->format('F Y') }}
+                    </span>
+                @endif
             </div>
 
-            <!-- Title & Status -->
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div>
-                    <div class="flex flex-wrap items-center gap-2 mb-2">
-                        @if ($event->cm_number)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-600 dark:text-amber-400 border border-amber-500/40">
-                                CM #{{ $event->cm_number }}
-                            </span>
-                        @endif
+            <h1 class="text-2xl sm:text-4xl font-black text-navy-950 dark:text-sail-50 tracking-tight font-sans">
+                {{ $event->title }}
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Comprehensive Global Server meta analysis, tier rankings, required parent skills, and team composition strategies.
+            </p>
+        </div>
 
-                        @if ($event->is_active)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                                ACTIVE CHAMPIONS MEETING
-                            </span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                ARCHIVED META
-                            </span>
-                        @endif
-
-                        @if ($event->event_date)
-                            <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                                &bull; {{ $event->event_date->format('F Y') }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-                        {{ $event->title }}
-                    </h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        Comprehensive Global Server Champions Meeting meta breakdown, tier rankings, optimal skill inherits, and team lineups.
-                    </p>
-                </div>
+        <!-- Horizontal Race Telemetry Strip (Single Clean Bar) -->
+        <div class="mt-4 bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x divide-sail-200 dark:divide-navy-700 text-center text-xs">
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">RACECOURSE</span>
+                <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $event->track_name }}</span>
             </div>
-
-            <!-- Track Condition Pills Bar -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2">
-                <!-- 1. Racecourse -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Racecourse</span>
-                    <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">{{ $event->track_name }}</span>
-                </div>
-
-                <!-- 2. Distance -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Distance</span>
-                    <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                        {{ $event->distance_type }} <span class="font-mono text-sky-600 dark:text-sky-400">({{ $event->distance_meters }}m)</span>
-                    </span>
-                </div>
-
-                <!-- 3. Surface -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Surface</span>
-                    <span class="text-xs sm:text-sm font-black {{ $event->surface === 'Turf' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
-                        {{ $event->surface }}
-                    </span>
-                </div>
-
-                <!-- 4. Season -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Season</span>
-                    <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">{{ $event->season ?? 'Winter' }}</span>
-                </div>
-
-                <!-- 5. Weather -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Weather</span>
-                    <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">{{ $event->weather ?? 'Sunny' }}</span>
-                </div>
-
-                <!-- 6. Track Condition -->
-                <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-center">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Condition</span>
-                    <span class="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400">{{ $event->track_condition ?? 'Firm' }}</span>
-                </div>
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">DISTANCE</span>
+                <span class="font-bold text-navy-950 dark:text-slate-100 font-mono tabular-nums">{{ $event->distance_meters }}m <span class="text-slate-400 font-normal">({{ $event->distance_type }})</span></span>
+            </div>
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">SURFACE</span>
+                <span class="font-bold font-mono {{ $event->surface === 'Turf' ? 'text-emerald-600 dark:text-emerald-400' : 'text-brass-600 dark:text-brass-400' }}">{{ $event->surface }}</span>
+            </div>
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">SEASON</span>
+                <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $event->season ?? 'Winter' }}</span>
+            </div>
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">WEATHER</span>
+                <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $event->weather ?? 'Sunny' }}</span>
+            </div>
+            <div class="p-2.5">
+                <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">CONDITION</span>
+                <span class="font-bold font-mono text-brass-600 dark:text-brass-400">{{ $event->track_condition ?? 'Firm' }}</span>
             </div>
         </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- SECTION 2: Tier List by Running Style (SS to C) -->
-    <!-- ========================================== -->
-    <section class="space-y-6">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <!-- ============================================================= -->
+    <!-- SECTION 2: Competitive Tier List Board (SS to C)             -->
+    <!-- ============================================================= -->
+    <section class="space-y-3">
+        <!-- Section Title & Counter -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-sail-200 dark:border-navy-700">
             <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 2</span>
-                    <span>&bull;</span>
-                    <span>Competitive Tier List</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Meta Tier List (SS &rarr; C)
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 02 &bull; TIER PROTOCOL</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    COMPETITIVE TIER LIST (SS &rarr; C)
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Click any racer card to open the complete individual build modal (stat targets, mandatory skills, inherited uniques, and strategies).
-                </p>
             </div>
-
-            <!-- Stats counter badge -->
-            <div class="flex items-center space-x-2 text-xs">
-                <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">
-                    Showing <span class="text-sky-600 dark:text-amber-400 font-mono" x-text="totalFilteredCount()"></span> / <span class="font-mono">{{ count($entries) }}</span> Umas
-                </span>
+            <div class="text-xs font-mono text-slate-500 dark:text-slate-400">
+                DISPLAYING <span class="font-bold text-navy-950 dark:text-brass-400 tabular-nums" x-text="totalFilteredCount()"></span> / <span class="tabular-nums">{{ count($entries) }}</span> UMAS
             </div>
         </div>
 
         <!-- Filter Toolbar -->
-        <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-5 shadow-lg space-y-4 transition-colors">
-            <!-- Top row: Search input -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="relative flex-1 max-w-md">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
+        <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md p-3 space-y-2.5 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <!-- Search Input -->
+                <div class="relative flex-1 max-w-sm">
                     <input type="text" x-ref="searchInput" x-model="search"
-                           placeholder="Search racer name or variant (e.g. Agnes, Alter, Falcon)..."
-                           class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 dark:focus:border-amber-500 transition-all">
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <template x-if="search">
-                            <button @click="search = ''" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold">&times;</button>
-                        </template>
+                           placeholder="Search racer (press '/' to focus)..."
+                           class="w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded px-3 py-1.5 text-xs text-navy-950 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-brass-500 font-mono">
+                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[10px] font-mono text-slate-400">
+                        /
                     </div>
                 </div>
 
-                <!-- Role Filter Buttons -->
-                <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1 hidden sm:inline">Role:</span>
+                <!-- Role Filters -->
+                <div class="flex items-center space-x-1">
+                    <span class="text-[10px] font-mono text-slate-400 uppercase mr-1">ROLE:</span>
                     <template x-for="role in ['All', 'Ace', 'Parent', 'Debuffer']" :key="role">
                         <button type="button" @click="selectedRole = role"
-                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                                :class="selectedRole === role ? 'bg-sky-600 dark:bg-amber-500 text-white dark:text-slate-950 shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'">
+                                class="px-2.5 py-1 rounded text-[11px] font-mono font-semibold transition-colors"
+                                :class="selectedRole === role ? 'bg-navy-900 dark:bg-navy-700 text-brass-400 border border-brass-500/40' : 'bg-sail-100 dark:bg-navy-750 text-slate-600 dark:text-slate-300 border border-sail-200 dark:border-navy-700 hover:border-slate-400'">
                             <span x-text="role"></span>
                         </button>
                     </template>
                 </div>
             </div>
 
-            <!-- Bottom row: Running Style Tabs -->
-            <div class="flex items-center space-x-1.5 overflow-x-auto pt-2 border-t border-sky-100 dark:border-sky-900/40">
+            <!-- Running Style Tabs -->
+            <div class="flex items-center space-x-1 overflow-x-auto pt-2 border-t border-sail-200 dark:border-navy-700/60 text-xs">
+                <span class="text-[10px] font-mono text-slate-400 uppercase mr-1 hidden sm:inline">STYLE:</span>
                 <template x-for="style in ['All', 'Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer']" :key="style">
                     <button type="button" @click="selectedStyle = style"
-                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
-                            :class="selectedStyle === style ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                            class="px-2.5 py-1 rounded text-[11px] font-mono transition-colors whitespace-nowrap"
+                            :class="selectedStyle === style ? 'bg-brass-500 text-navy-950 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-navy-950 dark:hover:text-white'">
                         <span x-text="style"></span>
                     </button>
                 </template>
             </div>
         </div>
 
-        <!-- Tier Board Rows: SS, S+, S, A, B, C -->
-        <div class="space-y-4">
+        <!-- Tier List Board Rows -->
+        <div class="space-y-2">
             <template x-for="rank in tierRanks" :key="rank">
                 <div x-show="filteredEntries(rank).length > 0 || !isFiltered()"
-                     class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/50 rounded-3xl overflow-hidden shadow-md transition-colors flex flex-col md:flex-row">
+                     class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md overflow-hidden flex flex-col md:flex-row">
                     
-                    <!-- Rank Label Box -->
-                    <div class="md:w-28 p-4 md:p-5 flex flex-row md:flex-col items-center justify-between md:justify-center border-b md:border-b-0 md:border-r border-sky-100 dark:border-sky-900/50 flex-shrink-0"
+                    <!-- Solid Left Rank Column -->
+                    <div class="md:w-20 p-2.5 md:p-3 flex flex-row md:flex-col items-center justify-between md:justify-center border-b md:border-b-0 md:border-r border-sail-200 dark:border-navy-700 flex-shrink-0 font-mono"
                          :class="{
-                            'bg-gradient-to-br from-amber-500/20 to-rose-600/20 text-amber-500': rank === 'SS',
-                            'bg-gradient-to-br from-amber-500/15 to-amber-600/15 text-amber-500': rank === 'S+',
-                            'bg-gradient-to-br from-sky-500/15 to-blue-600/15 text-sky-500': rank === 'S',
-                            'bg-gradient-to-br from-emerald-500/15 to-teal-600/15 text-emerald-500': rank === 'A',
-                            'bg-gradient-to-br from-indigo-500/15 to-purple-600/15 text-indigo-400': rank === 'B',
-                            'bg-gradient-to-br from-slate-500/15 to-slate-600/15 text-slate-400': rank === 'C',
+                            'bg-brass-500/15 text-brass-600 dark:text-brass-400 border-brass-500/30': rank === 'SS',
+                            'bg-rose-900/15 text-rose-600 dark:text-rose-400 border-rose-800/30': rank === 'S+',
+                            'bg-cerulean-600/15 text-cerulean-600 dark:text-cerulean-400 border-cerulean-500/30': rank === 'S',
+                            'bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border-emerald-800/30': rank === 'A',
+                            'bg-slate-200/50 dark:bg-navy-750 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700': rank === 'B',
+                            'bg-slate-100 dark:bg-navy-900 text-slate-500 dark:text-slate-500': rank === 'C',
                          }">
-                        <div class="text-2xl md:text-3xl font-black font-mono tracking-tight" x-text="rank"></div>
-                        <div class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-0.5">
-                            <span x-text="filteredEntries(rank).length"></span> Umas
+                        <div class="text-xl md:text-2xl font-black tracking-tight" x-text="rank"></div>
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            <span x-text="filteredEntries(rank).length"></span> UMAS
                         </div>
                     </div>
 
-                    <!-- Entries Grid for this Rank -->
-                    <div class="flex-1 p-4 md:p-5 min-h-[100px] flex items-center">
+                    <!-- Compact Uma Tiles Grid -->
+                    <div class="flex-1 p-2 sm:p-2.5 min-h-[70px] flex items-center">
                         <template x-if="filteredEntries(rank).length === 0">
-                            <div class="text-xs text-slate-400 dark:text-slate-500 italic py-2">
-                                No racers in this tier match current filters.
+                            <div class="text-xs font-mono text-slate-400 italic py-2 pl-2">
+                                No contenders in this tier match active filters.
                             </div>
                         </template>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 w-full">
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-2 w-full">
                             <template x-for="entry in filteredEntries(rank)" :key="entry.id">
                                 <div @click="openModal(entry)"
-                                     class="group cursor-pointer bg-slate-50 dark:bg-slate-900/80 hover:bg-sky-50/70 dark:hover:bg-slate-800/90 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-700 rounded-2xl p-2.5 transition-all duration-200 hover:-translate-y-0.5 shadow-sm hover:shadow-md flex flex-col items-center text-center relative overflow-hidden">
+                                     class="group cursor-pointer bg-sail-50 dark:bg-navy-900/70 hover:bg-sail-100 dark:hover:bg-navy-750 border border-sail-200 dark:border-navy-700 hover:border-brass-500/50 rounded overflow-hidden transition-all text-center flex flex-col justify-between">
                                     
-                                    <!-- Role Pill Badge -->
-                                    <div class="absolute top-1.5 right-1.5">
-                                        <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.2 rounded"
-                                              :class="{
-                                                'bg-rose-500/20 text-rose-500 border border-rose-500/40': entry.role === 'Ace',
-                                                'bg-amber-500/20 text-amber-500 border border-amber-500/40': entry.role === 'Parent',
-                                                'bg-purple-500/20 text-purple-400 border border-purple-500/40': entry.role === 'Debuffer'
-                                              }"
-                                              x-text="entry.role"></span>
-                                    </div>
-
-                                    <!-- Avatar -->
-                                    <div class="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 my-1 group-hover:scale-105 transition-transform duration-200">
+                                    <!-- Avatar Container -->
+                                    <div class="relative w-full aspect-square bg-navy-950 overflow-hidden">
                                         <template x-if="entry.character?.avatar_url">
-                                            <img :src="entry.character.avatar_url" :alt="entry.character.name" class="w-full h-full object-cover">
+                                            <img :src="entry.character.avatar_url" :alt="entry.character.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-150">
                                         </template>
                                         <template x-if="!entry.character?.avatar_url">
-                                            <div class="w-full h-full flex items-center justify-center font-black text-sm text-amber-500">
+                                            <div class="w-full h-full flex items-center justify-center font-mono font-bold text-xs text-brass-400">
                                                 <span x-text="(entry.character?.name || 'UM').substring(0, 2).toUpperCase()"></span>
                                             </div>
                                         </template>
+
+                                        <!-- Corner Role Tag -->
+                                        <div class="absolute top-1 right-1">
+                                            <span class="text-[8px] font-mono font-bold uppercase px-1 py-0.2 rounded"
+                                                  :class="{
+                                                    'bg-rose-600 text-white': entry.role === 'Ace',
+                                                    'bg-navy-800 text-brass-300 border border-brass-400/40': entry.role === 'Parent',
+                                                    'bg-purple-800 text-purple-200': entry.role === 'Debuffer'
+                                                  }"
+                                                  x-text="entry.role"></span>
+                                        </div>
                                     </div>
 
-                                    <!-- Character Name -->
-                                    <div class="w-full mt-1">
-                                        <div class="text-xs font-black text-slate-900 dark:text-white truncate" x-text="entry.character?.name"></div>
-                                        <div class="text-[10px] text-slate-400 truncate" x-text="entry.character?.variant_title || 'Original'"></div>
-                                    </div>
-
-                                    <!-- Running Style Badge -->
-                                    <div class="mt-2 w-full">
-                                        <span class="block w-full text-[9px] font-bold py-0.5 rounded bg-slate-200/60 dark:bg-slate-950 text-slate-600 dark:text-slate-400 truncate border border-slate-300/40 dark:border-slate-800"
-                                              x-text="entry.running_style || entry.recommended_style"></span>
+                                    <!-- Bottom Plate: Name & Style -->
+                                    <div class="p-1.5 bg-white dark:bg-navy-800 border-t border-sail-200 dark:border-navy-700 leading-tight">
+                                        <div class="text-[11px] font-bold text-navy-950 dark:text-slate-100 truncate" x-text="entry.character?.name"></div>
+                                        <div class="text-[9px] font-mono text-slate-400 truncate mt-0.5" x-text="entry.running_style || entry.recommended_style"></div>
                                     </div>
                                 </div>
                             </template>
@@ -393,130 +372,100 @@ class="space-y-12">
         </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- SECTION 3: Minimum & Recommended Stats     -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- SECTION 3: Minimum & Recommended Stats                        -->
+    <!-- ============================================================= -->
     @if ($event->stat_recommendations)
-        <section class="space-y-4">
-            <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 3</span>
-                    <span>&bull;</span>
-                    <span>Stat Benchmarks</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Target Stat Benchmarks
+        <section class="space-y-3">
+            <div class="pb-2 border-b border-sail-200 dark:border-navy-700">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 03 &bull; STAT METRICS</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    TARGET STAT BENCHMARKS
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Recommended target stats to ensure top survival rate and competitive speed on this track.
-                </p>
             </div>
 
-            <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-6 shadow-xl space-y-6 transition-colors">
-                <!-- 5 Stats Comparison Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3.5">
-                    @php
-                        $statConfigs = [
-                            'speed' => ['name' => 'Speed', 'color' => 'text-sky-500 dark:text-sky-400', 'bg' => 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800/60'],
-                            'stamina' => ['name' => 'Stamina', 'color' => 'text-rose-500 dark:text-rose-400', 'bg' => 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'],
-                            'power' => ['name' => 'Power', 'color' => 'text-amber-500 dark:text-amber-400', 'bg' => 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60'],
-                            'guts' => ['name' => 'Guts', 'color' => 'text-emerald-500 dark:text-emerald-400', 'bg' => 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'],
-                            'wit' => ['name' => 'Wit', 'color' => 'text-indigo-500 dark:text-indigo-400', 'bg' => 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60'],
-                        ];
-                    @endphp
+            <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md overflow-hidden">
+                @php
+                    $statList = [
+                        'speed' => 'Speed',
+                        'stamina' => 'Stamina',
+                        'power' => 'Power',
+                        'guts' => 'Guts',
+                        'wit' => 'Wit',
+                    ];
+                @endphp
 
-                    @foreach ($statConfigs as $key => $cfg)
+                <!-- 5-Cell Metric Table -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-sail-200 dark:divide-navy-700 text-center">
+                    @foreach ($statList as $key => $name)
                         @php
                             $minVal = $event->stat_recommendations['minimum'][$key] ?? '—';
                             $recVal = $event->stat_recommendations['recommended'][$key] ?? '—';
                         @endphp
-                        <div class="rounded-2xl border p-4 text-center {{ $cfg['bg'] }}">
-                            <span class="block text-xs font-bold uppercase tracking-wider {{ $cfg['color'] }}">{{ $cfg['name'] }}</span>
-                            
-                            <div class="mt-2 space-y-1">
-                                <div class="text-[10px] text-slate-400 uppercase font-semibold">Min Target</div>
-                                <div class="text-base font-black font-mono text-slate-700 dark:text-slate-300">{{ $minVal }}</div>
+                        <div class="p-3 space-y-1">
+                            <span class="text-[10px] font-mono uppercase font-bold text-slate-400 tracking-wider">{{ $name }}</span>
+                            <div class="text-sm font-bold font-mono text-navy-950 dark:text-white tabular-nums">
+                                {{ $recVal }}
                             </div>
-
-                            <div class="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1">
-                                <div class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Recommended</div>
-                                <div class="text-lg font-black font-mono text-slate-900 dark:text-white">{{ $recVal }}</div>
+                            <div class="text-[10px] font-mono text-slate-400 tabular-nums">
+                                Min: {{ $minVal }}
                             </div>
                         </div>
                     @endforeach
                 </div>
 
-                <!-- Notes / Stamina Requirements -->
                 @if (!empty($event->stat_recommendations['notes']))
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 flex items-start space-x-3">
-                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <span class="font-bold text-slate-900 dark:text-white">Track Stat Notes:</span>
-                            <p class="mt-0.5">{{ $event->stat_recommendations['notes'] }}</p>
-                        </div>
+                    <div class="p-3 bg-sail-50 dark:bg-navy-900 border-t border-sail-200 dark:border-navy-700 text-xs text-slate-600 dark:text-slate-300 font-mono">
+                        <strong class="text-brass-600 dark:text-brass-400 uppercase">Stamina / Guts Note:</strong>
+                        <span class="ml-1">{{ $event->stat_recommendations['notes'] }}</span>
                     </div>
                 @endif
             </div>
         </section>
     @endif
 
-    <!-- ========================================== -->
-    <!-- SECTION 4: Skill Inheritance (Parent Uniques) -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- SECTION 4: Skill Inheritance (Parent Uniques)                 -->
+    <!-- ============================================================= -->
     @if ($event->skill_inheritance)
-        <section class="space-y-4">
-            <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 4</span>
-                    <span>&bull;</span>
-                    <span>Inheritance Priority</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Skill Inheritance & Parent Uniques
+        <section class="space-y-3">
+            <div class="pb-2 border-b border-sail-200 dark:border-navy-700">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 04 &bull; INHERITANCE</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    PRIORITY INHERITED UNIQUE SKILLS
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Essential parent unique skills to inherit per running style to guarantee optimal spurt acceleration timing.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 @foreach (['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'] as $style)
-                    @php
-                        $skills = $event->skill_inheritance[$style] ?? [];
-                    @endphp
-                    <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-5 shadow-lg flex flex-col transition-colors">
-                        <div class="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-sky-900/40">
-                            <h3 class="font-black text-sm text-slate-900 dark:text-white">{{ $style }}</h3>
-                            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
-                                {{ count($skills) }} Priority
-                            </span>
+                    @php $skills = $event->skill_inheritance[$style] ?? []; @endphp
+                    <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md p-3.5 space-y-2.5">
+                        <div class="flex items-center justify-between pb-2 border-b border-sail-200 dark:border-navy-700">
+                            <span class="font-bold text-xs text-navy-950 dark:text-white font-mono">{{ $style }}</span>
+                            <span class="text-[10px] font-mono text-slate-400">{{ count($skills) }} skills</span>
                         </div>
 
-                        <div class="mt-4 space-y-2.5 flex-1">
+                        <div class="space-y-1.5">
                             @forelse ($skills as $item)
                                 @php
                                     $skillName = is_array($item) ? ($item['name'] ?? '') : $item;
                                     $skillIcon = is_array($item) ? ($item['icon'] ?? null) : null;
                                 @endphp
-                                <div class="flex items-center space-x-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80">
-                                    <div class="w-7 h-7 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-950 flex items-center justify-center flex-shrink-0 border border-slate-300 dark:border-slate-800">
+                                <div class="flex items-center space-x-2 p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60">
+                                    <div class="w-6 h-6 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
                                         @if ($skillIcon)
                                             <img src="{{ Str::startsWith($skillIcon, ['http://', 'https://']) ? $skillIcon : asset('storage/' . ltrim($skillIcon, '/')) }}"
                                                  alt="{{ $skillName }}" class="w-full h-full object-cover">
                                         @else
-                                            <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3 h-3 text-brass-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
                                         @endif
                                     </div>
-                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ $skillName }}</span>
+                                    <span class="text-xs font-semibold text-navy-950 dark:text-slate-200 truncate">{{ $skillName }}</span>
                                 </div>
                             @empty
-                                <div class="text-xs text-slate-400 dark:text-slate-500 italic py-3 text-center">
-                                    No specific inheritance defined.
-                                </div>
+                                <div class="text-[11px] font-mono text-slate-400 italic py-1">No specific inheritances.</div>
                             @endforelse
                         </div>
                     </div>
@@ -525,89 +474,71 @@ class="space-y-12">
         </section>
     @endif
 
-    <!-- ========================================== -->
-    <!-- SECTION 5: Recommended Skills per Style    -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- SECTION 5: Recommended Skills per Running Style              -->
+    <!-- ============================================================= -->
     @if ($event->recommended_skills)
-        <section class="space-y-4">
-            <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 5</span>
-                    <span>&bull;</span>
-                    <span>Skill Hierarchy</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Recommended Skills by Running Style
+        <section class="space-y-3">
+            <div class="pb-2 border-b border-sail-200 dark:border-navy-700">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 05 &bull; SKILL BLUEPRINT</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    RECOMMENDED SKILLS BY RUNNING STYLE
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Separating core acceleration triggers from mid-leg velocity and stamina recovery skills.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 @foreach (['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'] as $style)
                     @php
                         $styleSkills = $event->recommended_skills[$style] ?? [];
                         $coreAccel = $styleSkills['core_accel'] ?? [];
                         $velocityOther = $styleSkills['velocity_other'] ?? [];
                     @endphp
-                    <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-5 sm:p-6 shadow-lg space-y-4 transition-colors">
-                        <div class="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-sky-900/40">
-                            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                                <span>{{ $style }}</span>
-                            </h3>
-                            <span class="text-xs font-bold text-slate-400 uppercase">Skill Kit</span>
+                    <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md p-3.5 space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-sail-200 dark:border-navy-700">
+                            <span class="font-bold text-xs font-mono text-navy-950 dark:text-white">{{ $style }}</span>
+                            <span class="text-[10px] font-mono text-slate-400 uppercase">Skill Kit</span>
                         </div>
 
-                        <!-- Core Accel Sub-Block -->
-                        <div class="space-y-2">
-                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-rose-500 flex items-center space-x-1">
-                                <span>Core Acceleration (Mandatory)</span>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
+                        <!-- Core Accel -->
+                        <div>
+                            <span class="block text-[9px] font-mono uppercase font-bold text-rose-500 mb-1.5">Core Acceleration (Mandatory)</span>
+                            <div class="flex flex-wrap gap-1.5">
                                 @forelse ($coreAccel as $skill)
                                     @php
                                         $sName = is_array($skill) ? ($skill['name'] ?? '') : $skill;
                                         $sIcon = is_array($skill) ? ($skill['icon'] ?? null) : null;
                                     @endphp
-                                    <div class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-xs font-bold text-rose-700 dark:text-rose-300">
+                                    <span class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
                                         @if ($sIcon)
                                             <img src="{{ Str::startsWith($sIcon, ['http://', 'https://']) ? $sIcon : asset('storage/' . ltrim($sIcon, '/')) }}"
-                                                 alt="{{ $sName }}" class="w-4 h-4 rounded object-cover">
-                                        @else
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                 alt="{{ $sName }}" class="w-3.5 h-3.5 rounded object-cover">
                                         @endif
                                         <span>{{ $sName }}</span>
-                                    </div>
+                                    </span>
                                 @empty
-                                    <span class="text-xs text-slate-400 italic">None specified.</span>
+                                    <span class="text-[11px] font-mono text-slate-400 italic">None specified.</span>
                                 @endforelse
                             </div>
                         </div>
 
-                        <!-- Velocity & Recovery Sub-Block -->
-                        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 flex items-center space-x-1">
-                                <span>Velocity & Support</span>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
+                        <!-- Velocity & Support -->
+                        <div>
+                            <span class="block text-[9px] font-mono uppercase font-bold text-cerulean-500 mb-1.5">Velocity &amp; Positioning</span>
+                            <div class="flex flex-wrap gap-1.5">
                                 @forelse ($velocityOther as $skill)
                                     @php
                                         $sName = is_array($skill) ? ($skill['name'] ?? '') : $skill;
                                         $sIcon = is_array($skill) ? ($skill['icon'] ?? null) : null;
                                     @endphp
-                                    <div class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/50 text-xs font-bold text-sky-700 dark:text-sky-300">
+                                    <span class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-sail-100 dark:bg-navy-750 border border-sail-200 dark:border-navy-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                                         @if ($sIcon)
                                             <img src="{{ Str::startsWith($sIcon, ['http://', 'https://']) ? $sIcon : asset('storage/' . ltrim($sIcon, '/')) }}"
-                                                 alt="{{ $sName }}" class="w-4 h-4 rounded object-cover">
-                                        @else
-                                            <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                                                 alt="{{ $sName }}" class="w-3.5 h-3.5 rounded object-cover">
                                         @endif
                                         <span>{{ $sName }}</span>
-                                    </div>
+                                    </span>
                                 @empty
-                                    <span class="text-xs text-slate-400 italic">None specified.</span>
+                                    <span class="text-[11px] font-mono text-slate-400 italic">None specified.</span>
                                 @endforelse
                             </div>
                         </div>
@@ -617,67 +548,55 @@ class="space-y-12">
         </section>
     @endif
 
-    <!-- ========================================== -->
-    <!-- SECTION 6: Recommended Support Card Decks  -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- SECTION 6: Support Card (Supoka) Decks                       -->
+    <!-- ============================================================= -->
     @if ($event->supoka_decks)
-        <section class="space-y-4">
-            <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 6</span>
-                    <span>&bull;</span>
-                    <span>Deck Building</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Recommended Support Card (Supoka) Decks
+        <section class="space-y-3">
+            <div class="pb-2 border-b border-sail-200 dark:border-navy-700">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 06 &bull; DECK ARCHETYPES</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    RECOMMENDED SUPPORT CARD DECKS
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Tested training deck templates with card synergies and stat distribution targets.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 @foreach ($event->supoka_decks as $deck)
-                    <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-6 shadow-lg space-y-4 transition-colors">
-                        <div class="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-sky-900/40">
-                            <div>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white">
-                                    {{ $deck['archetype'] ?? 'Deck Archetype' }}
-                                </h3>
-                                <span class="text-[11px] font-bold text-amber-500 uppercase">Optimal Training Setup</span>
-                            </div>
+                    <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md p-4 space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-sail-200 dark:border-navy-700">
+                            <h3 class="font-bold text-sm text-navy-950 dark:text-sail-100 font-sans">
+                                {{ $deck['archetype'] ?? 'Deck Template' }}
+                            </h3>
+                            <span class="text-[10px] font-mono text-brass-500 font-bold uppercase">Optimal Ratio</span>
                         </div>
 
                         <!-- 6 Cards Grid -->
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             @foreach ($deck['cards'] ?? [] as $card)
                                 @php
                                     $cardName = is_array($card) ? ($card['name'] ?? '') : $card;
                                     $cardIcon = is_array($card) ? ($card['icon'] ?? null) : null;
                                 @endphp
-                                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center space-x-2">
-                                    <div class="w-8 h-8 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-950 flex items-center justify-center flex-shrink-0 border border-slate-300 dark:border-slate-700">
+                                <div class="p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60 flex items-center space-x-2">
+                                    <div class="w-7 h-7 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
                                         @if ($cardIcon)
                                             <img src="{{ Str::startsWith($cardIcon, ['http://', 'https://']) ? $cardIcon : asset('storage/' . ltrim($cardIcon, '/')) }}"
                                                  alt="{{ $cardName }}" class="w-full h-full object-cover">
                                         @else
-                                            <span class="text-[9px] font-black text-amber-500">SSR</span>
+                                            <span class="text-[9px] font-mono font-bold text-brass-400">SSR</span>
                                         @endif
                                     </div>
-                                    <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate leading-tight" title="{{ $cardName }}">
+                                    <div class="text-[11px] font-semibold text-navy-950 dark:text-slate-200 truncate leading-tight" title="{{ $cardName }}">
                                         {{ $cardName }}
                                     </div>
                                 </div>
                             @endforeach
                         </div>
 
-                        <!-- Deck Notes -->
                         @if (!empty($deck['notes']))
-                            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-300 flex items-start space-x-2">
-                                <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{{ $deck['notes'] }}</span>
+                            <div class="p-2.5 rounded bg-sail-100 dark:bg-navy-750 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+                                <span class="text-brass-500 font-bold uppercase mr-1">Notes:</span>
+                                {{ $deck['notes'] }}
                             </div>
                         @endif
                     </div>
@@ -686,59 +605,44 @@ class="space-y-12">
         </section>
     @endif
 
-    <!-- ========================================== -->
-    <!-- SECTION 7: Recommended Team Compositions   -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- SECTION 7: Recommended Team Compositions                     -->
+    <!-- ============================================================= -->
     @if ($event->team_compositions)
-        <section class="space-y-4">
-            <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
-                    <span>Section 7</span>
-                    <span>&bull;</span>
-                    <span>Tactical Strategy</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Recommended 3-Uma Team Compositions
+        <section class="space-y-3">
+            <div class="pb-2 border-b border-sail-200 dark:border-navy-700">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-brass-500 font-bold">SECTION 07 &bull; TEAM STRATEGY</div>
+                <h2 class="text-lg font-black text-navy-950 dark:text-sail-50 font-sans uppercase">
+                    3-UMA TEAM FORMATIONS
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Synergistic 3-member lineups and strategic win conditions against opposing Champions Meeting teams.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 @foreach ($event->team_compositions as $comp)
-                    <div class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl p-6 shadow-lg space-y-4 transition-colors">
-                        <div class="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-sky-900/40">
-                            <h3 class="text-lg font-black text-slate-900 dark:text-white">
-                                {{ $comp['name'] ?? 'Team Composition' }}
+                    <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md p-4 space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-sail-200 dark:border-navy-700">
+                            <h3 class="font-bold text-sm text-navy-950 dark:text-sail-100 font-sans">
+                                {{ $comp['name'] ?? 'Team Lineup' }}
                             </h3>
-                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                                3-Uma Lineup
-                            </span>
+                            <span class="text-[10px] font-mono text-emerald-500 uppercase font-bold">3-Racer Synergy</span>
                         </div>
 
-                        <!-- 3-Uma Lineup Pills -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                            @foreach ($comp['lineup'] ?? [] as $member)
-                                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-center">
-                                    <div class="text-[10px] uppercase font-bold text-slate-400">Racer Slot</div>
-                                    <div class="text-xs sm:text-sm font-black text-slate-900 dark:text-white mt-0.5">
+                        <!-- 3 Lineup Slots -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            @foreach ($comp['lineup'] ?? [] as $i => $member)
+                                <div class="p-2 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60 text-center">
+                                    <div class="text-[9px] font-mono uppercase text-slate-400">SLOT {{ $i + 1 }}</div>
+                                    <div class="text-xs font-bold text-navy-950 dark:text-white mt-0.5 truncate">
                                         {{ $member }}
                                     </div>
                                 </div>
                             @endforeach
                         </div>
 
-                        <!-- Tactical Win Condition Strategy -->
                         @if (!empty($comp['strategy']))
-                            <div class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-                                <div class="font-bold text-sky-700 dark:text-sky-400 flex items-center space-x-1.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                    </svg>
-                                    <span>Tactical Strategy & Win Condition:</span>
-                                </div>
-                                <p class="leading-relaxed pl-5">{{ $comp['strategy'] }}</p>
+                            <div class="p-2.5 rounded bg-sail-100 dark:bg-navy-750 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+                                <span class="text-cerulean-500 font-bold uppercase mr-1">Tactical Protocol:</span>
+                                {{ $comp['strategy'] }}
                             </div>
                         @endif
                     </div>
@@ -747,138 +651,115 @@ class="space-y-12">
         </section>
     @endif
 
-    <!-- ========================================== -->
-    <!-- SECTION 8: Meta Changelog Accordion        -->
-    <!-- ========================================== -->
-    <section x-data="{ open: false }" class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/60 rounded-3xl overflow-hidden shadow-lg transition-colors">
+    <!-- ============================================================= -->
+    <!-- SECTION 8: Meta Changelog Accordion                          -->
+    <!-- ============================================================= -->
+    <section x-data="{ open: false }" class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-md overflow-hidden">
         <button @click="open = !open" type="button"
-                class="w-full p-5 sm:p-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors text-left">
+                class="w-full p-4 flex items-center justify-between hover:bg-sail-50 dark:hover:bg-navy-750/50 transition-colors text-left font-mono">
             <div>
-                <div class="flex items-center space-x-2 text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-0.5">
-                    <span>Section 8</span>
-                    <span>&bull;</span>
-                    <span>Meta Audit History</span>
-                </div>
-                <h3 class="text-lg font-black text-slate-900 dark:text-white">
-                    Meta Changelog & Tier Movements
+                <div class="text-[10px] uppercase tracking-wider text-brass-500 font-bold">SECTION 08 &bull; AUDIT LOG</div>
+                <h3 class="font-bold text-sm text-navy-950 dark:text-sail-100 font-sans uppercase">
+                    META CHANGELOG & TIER MOVEMENTS
                 </h3>
-                <span class="text-xs text-slate-400">{{ count($changelogs) }} documented balance adjustments for this tournament.</span>
             </div>
-
-            <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="text-xs text-slate-400 flex items-center space-x-2">
+                <span>{{ count($changelogs) }} records</span>
+                <svg class="w-4 h-4 transition-transform duration-150" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </div>
         </button>
 
-        <div x-show="open" x-cloak class="border-t border-sky-100 dark:border-sky-900/40 divide-y divide-sky-100 dark:divide-sky-900/30">
+        <div x-show="open" x-cloak class="border-t border-sail-200 dark:border-navy-700 divide-y divide-sail-100 dark:divide-navy-750 text-xs font-mono">
             @forelse ($changelogs as $log)
-                <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 flex items-center justify-center font-bold text-amber-500 flex-shrink-0">
+                <div class="p-3 sm:px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-7 h-7 rounded overflow-hidden bg-navy-950 border border-slate-700 flex items-center justify-center font-bold text-[10px] text-brass-400 flex-shrink-0">
                             @if ($log->character?->avatar_url)
                                 <img src="{{ $log->character->avatar_url }}" alt="{{ $log->character->name }}" class="w-full h-full object-cover">
                             @else
                                 {{ strtoupper(substr($log->character?->name ?? 'UM', 0, 2)) }}
                             @endif
                         </div>
-
                         <div>
                             <div class="flex items-center space-x-2">
-                                <span class="font-black text-slate-900 dark:text-white">{{ $log->character?->full_name }}</span>
-                                <div class="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                                    <span class="text-slate-400">{{ $log->previous_tier ?? 'New' }}</span>
-                                    <span class="text-amber-500">&rarr;</span>
-                                    <span class="text-amber-600 dark:text-amber-400 font-extrabold">{{ $log->new_tier }}</span>
-                                </div>
+                                <span class="font-bold text-navy-950 dark:text-white">{{ $log->character?->full_name }}</span>
+                                <span class="px-1 py-0.2 rounded text-[9px] bg-sail-100 dark:bg-navy-700 text-slate-600 dark:text-slate-300">
+                                    {{ $log->previous_tier ?? 'New' }} &rarr; <strong class="text-brass-500">{{ $log->new_tier }}</strong>
+                                </span>
                             </div>
-                            <p class="text-slate-500 dark:text-slate-400 mt-0.5">{{ $log->reason }}</p>
+                            @if ($log->reason)
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $log->reason }}</div>
+                            @endif
                         </div>
                     </div>
-
-                    <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 flex-shrink-0">
-                        {{ $log->created_at->diffForHumans() }}
+                    <div class="text-[10px] text-slate-400 tabular-nums">
+                        {{ $log->created_at->format('Y-m-d') }}
                     </div>
                 </div>
             @empty
-                <div class="p-8 text-center text-xs text-slate-400 italic">
-                    No changelogs recorded yet for this tournament.
-                </div>
+                <div class="p-4 text-center text-xs text-slate-400 italic">No changelogs recorded for this event.</div>
             @endforelse
         </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- BUILD NOTES MODAL (Individual Uma Details) -->
-    <!-- ========================================== -->
+    <!-- ============================================================= -->
+    <!-- BUILD NOTES MODAL (High-Density Dossier Modal)               -->
+    <!-- ============================================================= -->
     <div x-show="modalOpen" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+         class="fixed inset-0 z-50 overflow-y-auto bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         
         <div @click.away="closeModal()"
              x-show="modalOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             class="bg-white dark:bg-[#0E1726] border border-sky-100 dark:border-sky-900/80 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative text-left">
+             class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg max-w-xl w-full p-5 sm:p-6 space-y-4 shadow-xl relative text-left">
             
             <button @click="closeModal()" type="button"
-                    class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                    class="absolute top-4 right-4 text-slate-400 hover:text-navy-950 dark:hover:text-white font-mono text-sm">
+                [ESC] &times;
             </button>
 
-            <!-- Modal Header with Character Details -->
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center flex-shrink-0">
+            <!-- Modal Header -->
+            <div class="flex items-center space-x-3.5 pb-3 border-b border-sail-200 dark:border-navy-700">
+                <div class="w-14 h-14 rounded overflow-hidden bg-navy-950 border border-sail-200 dark:border-navy-700 flex items-center justify-center flex-shrink-0">
                     <template x-if="selectedEntry?.character?.avatar_url">
                         <img :src="selectedEntry.character.avatar_url" :alt="selectedEntry.character.name" class="w-full h-full object-cover">
                     </template>
                     <template x-if="!selectedEntry?.character?.avatar_url">
-                        <span class="font-black text-amber-500 text-lg" x-text="(selectedEntry?.character?.name || 'UM').substring(0, 2).toUpperCase()"></span>
+                        <span class="font-mono font-black text-brass-400 text-base" x-text="(selectedEntry?.character?.name || 'UM').substring(0, 2).toUpperCase()"></span>
                     </template>
                 </div>
 
                 <div class="space-y-1">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs font-black px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-500 border border-amber-500/40 font-mono"
-                              x-text="'Tier ' + selectedEntry?.tier_rank"></span>
-                        <span class="text-xs font-bold px-2 py-0.5 rounded-lg bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800"
+                    <div class="flex items-center space-x-1.5 font-mono text-[10px]">
+                        <span class="px-1.5 py-0.2 rounded font-bold bg-brass-500/20 text-brass-600 dark:text-brass-400 border border-brass-500/30"
+                              x-text="'TIER ' + selectedEntry?.tier_rank"></span>
+                        <span class="px-1.5 py-0.2 rounded bg-sail-100 dark:bg-navy-750 text-slate-600 dark:text-slate-300 border border-sail-200 dark:border-navy-700"
                               x-text="selectedEntry?.running_style || selectedEntry?.recommended_style"></span>
-                        <span class="text-xs font-bold px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-500 border border-rose-500/30"
+                        <span class="px-1.5 py-0.2 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40"
                               x-text="selectedEntry?.role"></span>
                     </div>
 
-                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white" x-text="selectedEntry?.character?.full_name"></h3>
-                    <div class="text-xs text-slate-400" x-text="selectedEntry?.character?.rarity ? selectedEntry.character.rarity + '★ Base Rarity' : ''"></div>
+                    <h3 class="font-bold text-lg text-navy-950 dark:text-sail-100 font-sans" x-text="selectedEntry?.character?.full_name"></h3>
+                    <div class="text-[11px] font-mono text-slate-400" x-text="selectedEntry?.character?.rarity ? selectedEntry.character.rarity + '★ BASE RARITY' : ''"></div>
                 </div>
             </div>
 
-            <!-- Modal Body: Build Specifications -->
-            <div class="space-y-4 pt-2 border-t border-sky-100 dark:border-sky-900/40 text-xs text-slate-700 dark:text-slate-300">
+            <!-- Modal Body -->
+            <div class="space-y-3 text-xs">
                 <!-- Target Stats -->
                 <div>
-                    <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px] mb-1">Target Stat Distribution</h4>
-                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 font-mono font-bold text-slate-900 dark:text-white text-sm"
-                         x-text="selectedEntry?.build_notes?.target_stats || 'Not specified'"></div>
+                    <span class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">TARGET STAT DISTRIBUTION</span>
+                    <div class="p-2.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 font-mono font-bold text-navy-950 dark:text-white tabular-nums text-xs"
+                         x-text="selectedEntry?.build_notes?.target_stats || 'Standard track targets'"></div>
                 </div>
 
                 <!-- Mandatory Skills -->
                 <div>
-                    <h4 class="font-bold uppercase tracking-wider text-rose-500 text-[10px] mb-1">Mandatory Skills</h4>
-                    <div class="flex flex-wrap gap-1.5">
+                    <span class="block text-[10px] font-mono uppercase font-bold text-rose-500 mb-1">MANDATORY ACCEL & SKILLS</span>
+                    <div class="flex flex-wrap gap-1">
                         <template x-for="skill in (selectedEntry?.build_notes?.mandatory_skills || [])" :key="skill">
-                            <span class="px-2.5 py-1 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 font-bold"
+                            <span class="px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 font-semibold text-[11px]"
                                   x-text="typeof skill === 'object' ? skill.name : skill"></span>
                         </template>
                     </div>
@@ -886,30 +767,31 @@ class="space-y-12">
 
                 <!-- Inherited Uniques -->
                 <div>
-                    <h4 class="font-bold uppercase tracking-wider text-amber-500 text-[10px] mb-1">Inherited Unique Skills</h4>
-                    <div class="flex flex-wrap gap-1.5">
+                    <span class="block text-[10px] font-mono uppercase font-bold text-brass-500 mb-1">INHERITED UNIQUE SKILLS</span>
+                    <div class="flex flex-wrap gap-1">
                         <template x-for="skill in (selectedEntry?.build_notes?.inherited_uniques || [])" :key="skill">
-                            <span class="px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 font-bold"
+                            <span class="px-2 py-0.5 rounded bg-sail-100 dark:bg-navy-750 text-slate-700 dark:text-slate-200 border border-sail-200 dark:border-navy-700 font-semibold text-[11px]"
                                   x-text="typeof skill === 'object' ? skill.name : skill"></span>
                         </template>
                     </div>
                 </div>
 
-                <!-- Strategic Summary -->
+                <!-- Summary -->
                 <div>
-                    <h4 class="font-bold uppercase tracking-wider text-sky-500 text-[10px] mb-1">Tactical Analysis & Build Strategy</h4>
-                    <p class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 leading-relaxed text-slate-700 dark:text-slate-300 text-xs"
+                    <span class="block text-[10px] font-mono uppercase font-bold text-cerulean-500 mb-1">TACTICAL ANALYSIS</span>
+                    <p class="p-2.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 text-slate-600 dark:text-slate-300 leading-relaxed font-sans text-xs"
                        x-text="selectedEntry?.build_notes?.summary || 'No detailed tactical summary provided.'"></p>
                 </div>
             </div>
 
-            <div class="pt-2 text-right">
+            <div class="pt-2 text-right border-t border-sail-200 dark:border-navy-700">
                 <button @click="closeModal()" type="button"
-                        class="px-5 py-2.5 rounded-2xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs transition-colors">
-                    Close Build Guide
+                        class="px-4 py-1.5 rounded bg-navy-900 dark:bg-navy-700 text-brass-400 hover:text-brass-300 font-mono text-xs font-bold transition-colors">
+                    CLOSE [ESC]
                 </button>
             </div>
         </div>
     </div>
+
 </div>
 @endsection

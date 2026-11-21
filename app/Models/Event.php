@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +69,28 @@ class Event extends Model
     public function changelogs(): HasMany
     {
         return $this->hasMany(Changelog::class)->latest();
+    }
+
+    /**
+     * Users who have bookmarked this event.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function bookmarkedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'event_user')->withTimestamps();
+    }
+
+    /**
+     * Determine if a given user bookmarked this event.
+     */
+    public function isBookmarkedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $this->bookmarkedByUsers()->where('user_id', $user->id)->exists();
     }
 
     /**

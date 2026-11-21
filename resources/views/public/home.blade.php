@@ -1,268 +1,266 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="space-y-12">
+<div class="space-y-8">
 
-    <!-- 1. Hero Spotlight: Latest / Active CM -->
+    <!-- 1. Hero Spotlight: Active Champions Meeting (If Active) -->
     @if ($activeEvent)
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-slate-50 to-sky-50 dark:from-[#0E172B] dark:via-[#11192E] dark:to-[#090E1A] border border-sky-200/80 dark:border-sky-900/50 p-6 sm:p-10 shadow-2xl transition-all duration-300">
-            <!-- Ambient Decorative Elements -->
-            <div class="absolute -right-20 -top-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute right-1/3 -bottom-24 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div class="space-y-4 max-w-2xl">
-                    <!-- Event Edition & Status Pill -->
+        <section class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-5 sm:p-6 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-5 border-b border-sail-200 dark:border-navy-700">
+                <div class="space-y-2">
+                    <!-- Status & Telemetry Protocol -->
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
-                            <span>Featured Tournament Spotlight</span>
-                        </span>
-                        @if ($activeEvent->is_active)
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                                Active Meta Track
+                        @if ($activeEvent->cm_number)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brass-500/15 text-brass-600 dark:text-brass-400 border border-brass-500/30 uppercase">
+                                CM #{{ $activeEvent->cm_number }}
                             </span>
                         @endif
+                        @if ($activeEvent->is_active)
+                            <span class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>{{ __('ui.cm.live_now') }}</span>
+                            </span>
+                        @endif
+                        <span class="text-[10px] font-mono text-slate-400 uppercase">
+                            Global Meta Benchmark
+                        </span>
                     </div>
 
-                    <!-- CM Title & Headline -->
+                    <!-- Title & Subtitle -->
                     <div>
-                        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                        <h1 class="text-2xl sm:text-4xl font-black text-navy-950 dark:text-sail-50 tracking-tight leading-tight font-sans">
                             {{ $activeEvent->title }}
                         </h1>
-                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-                            Comprehensive Global Meta Guide &bull; Track Analysis, Stat Targets, Skills & Supoka Decks
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                            Complete racing telemetry, tier rankings, required spurt skills, and 3-Uma lineup synergy.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Primary CTA & Bookmark -->
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    @auth
+                        <form method="POST" action="{{ route('cm.bookmark', $activeEvent) }}" class="inline">
+                            @csrf
+                            <button type="submit"
+                                    class="inline-flex items-center space-x-1.5 px-3 py-2.5 rounded-md text-xs font-mono font-semibold border transition-colors {{ $activeEvent->isBookmarkedBy(auth()->user()) ? 'bg-brass-500 text-navy-950 border-brass-500' : 'bg-sail-100 dark:bg-navy-750 text-slate-700 dark:text-slate-200 border-sail-200 dark:border-navy-700 hover:border-brass-500' }}"
+                                    title="{{ $activeEvent->isBookmarkedBy(auth()->user()) ? __('ui.cm.bookmarked') : __('ui.cm.bookmark_this') }}">
+                                <svg class="w-3.5 h-3.5 {{ $activeEvent->isBookmarkedBy(auth()->user()) ? 'fill-current text-navy-950' : 'text-brass-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                <span>{{ $activeEvent->isBookmarkedBy(auth()->user()) ? __('ui.cm.bookmarked') : __('ui.cm.bookmark_this') }}</span>
+                            </button>
+                        </form>
+                    @endauth
+
+                    <a href="{{ route('cm.show', $activeEvent) }}"
+                       class="inline-flex items-center space-x-2 px-5 py-2.5 rounded-md text-xs font-mono font-bold uppercase tracking-wider bg-brass-500 hover:bg-brass-400 text-navy-950 shadow-sm transition-all duration-150">
+                        <span>{{ __('ui.cm.view_guide') }} &rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Race Telemetry Strip (Integrated Single Horizontal Bar) -->
+            <div class="mt-4 bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x divide-sail-200 dark:divide-navy-700 text-center text-xs">
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.track') }}</span>
+                    <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $activeEvent->track_name }}</span>
+                </div>
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.distance') }}</span>
+                    <span class="font-bold text-navy-950 dark:text-slate-100 font-mono tabular-nums">{{ $activeEvent->distance_meters }}m <span class="text-slate-400 font-normal">({{ $activeEvent->distance_type }})</span></span>
+                </div>
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.surface') }}</span>
+                    <span class="font-bold font-mono {{ $activeEvent->surface === 'Turf' ? 'text-emerald-600 dark:text-emerald-400' : 'text-brass-600 dark:text-brass-400' }}">{{ $activeEvent->surface }}</span>
+                </div>
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.season') }}</span>
+                    <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $activeEvent->season ?? 'Winter' }}</span>
+                </div>
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.weather') }}</span>
+                    <span class="font-bold text-navy-950 dark:text-slate-100 font-mono">{{ $activeEvent->weather ?? 'Sunny' }}</span>
+                </div>
+                <div class="p-2.5">
+                    <span class="block text-[9px] font-mono uppercase tracking-wider text-slate-400">{{ __('ui.cm.condition') }}</span>
+                    <span class="font-bold font-mono text-brass-600 dark:text-brass-400">{{ $activeEvent->track_condition ?? 'Firm' }}</span>
+                </div>
+            </div>
+
+            <!-- Top Contender Strip -->
+            @if ($topRacers->isNotEmpty())
+                <div class="mt-4 pt-3 border-t border-sail-200 dark:border-navy-700/60 flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mr-1">Apex Contenders:</span>
+                    @foreach ($topRacers as $racer)
+                        <div class="inline-flex items-center space-x-2 bg-sail-100/70 dark:bg-navy-750/60 border border-sail-200 dark:border-navy-700 rounded px-2 py-1">
+                            <div class="w-5 h-5 rounded overflow-hidden bg-navy-900 border border-slate-700 flex items-center justify-center flex-shrink-0">
+                                @if ($racer->character?->avatar_url)
+                                    <img src="{{ $racer->character->avatar_url }}" alt="{{ $racer->character->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-[9px] font-mono font-black text-brass-400">{{ strtoupper(substr($racer->character?->name ?? 'UM', 0, 2)) }}</span>
+                                @endif
+                            </div>
+                            <span class="text-xs font-semibold text-navy-950 dark:text-slate-200">{{ $racer->character?->name }}</span>
+                            <span class="text-[9px] font-mono font-black px-1 rounded {{ $racer->tier_rank === 'SS' ? 'bg-brass-500/20 text-brass-600 dark:text-brass-400 border border-brass-500/40' : 'bg-slate-200 dark:bg-navy-600 text-slate-700 dark:text-slate-300' }}">
+                                {{ $racer->tier_rank }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+    @endif
+
+    <!-- 2. Main Navigation Hub (Uma Musume, Support Cards, Skills, & CM Archives) -->
+    <section class="space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-sail-200 dark:border-navy-700">
+            <div>
+                <h2 class="text-xl font-black text-navy-950 dark:text-sail-50 tracking-tight font-sans uppercase">
+                    CHEVAL GRAND META COMMAND HUB
+                </h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Direct access to official Global Uma Musume databases, deck guides, skill calculations, and tournament archives.
+                </p>
+            </div>
+            <span class="hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest text-brass-500 font-bold px-2 py-1 rounded bg-brass-500/10 border border-brass-500/20">
+                Core Nav Protocol
+            </span>
+        </div>
+
+        <!-- 4 Core Navigation Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Hub Card 1: Uma Musume Database -->
+            <a href="{{ route('guides.umas') }}"
+               class="group bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 hover:border-brass-500/60 dark:hover:border-brass-500/60 rounded-lg p-5 flex flex-col justify-between transition-all duration-150 shadow-sm hover:shadow-md">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-md bg-brass-500/15 border border-brass-500/30 flex items-center justify-center text-brass-500 group-hover:bg-brass-500 group-hover:text-navy-950 transition-colors">
+                            <!-- Horse / Uma Crown Icon -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-brass-600 dark:text-brass-400 bg-brass-500/10 px-2 py-0.5 rounded border border-brass-500/20">
+                            Uma Roster
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-navy-950 dark:text-sail-100 group-hover:text-brass-500 transition-colors font-sans">
+                            {{ __('ui.database.umas_title') }}
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            {{ __('ui.database.umas_desc') }}
                         </p>
                     </div>
 
-                    <!-- Structured Track Condition Pills -->
-                    <div class="flex flex-wrap items-center gap-2 pt-1">
-                        <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">
-                            📍 {{ $activeEvent->track_name }}
-                        </span>
-                        <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">
-                            🏃 {{ $activeEvent->distance_type }} ({{ $activeEvent->distance_meters }}m)
-                        </span>
-                        <span class="px-3 py-1.5 rounded-xl text-xs font-extrabold border shadow-sm {{ $activeEvent->surface === 'Turf' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' }}">
-                            🌱 {{ $activeEvent->surface }}
-                        </span>
-                        <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm">
-                            ❄️ {{ $activeEvent->season }} &bull; ☀️ {{ $activeEvent->weather }} &bull; {{ $activeEvent->track_condition }}
-                        </span>
+                    <div class="pt-2 border-t border-sail-100 dark:border-navy-750 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span>Aptitude &bull; Styles</span>
+                        <span class="text-brass-500 font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
                     </div>
-
-                    <!-- Top Uma Preview Badges -->
-                    @if ($topRacers->isNotEmpty())
-                        <div class="pt-2">
-                            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Top Contender Previews:</span>
-                            <div class="flex flex-wrap items-center gap-3">
-                                @foreach ($topRacers as $racer)
-                                    <div class="flex items-center space-x-2 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 pr-3 shadow-sm">
-                                        @if ($racer->character?->avatar_url)
-                                            <img src="{{ $racer->character->avatar_url }}" alt="{{ $racer->character->name }}"
-                                                 class="w-7 h-7 rounded-xl object-cover bg-slate-950 border border-amber-500/40">
-                                        @else
-                                            <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-slate-700 to-slate-800 flex items-center justify-center font-bold text-[10px] text-amber-400">
-                                                {{ strtoupper(substr($racer->character?->name ?? 'UM', 0, 2)) }}
-                                            </div>
-                                        @endif
-                                        <div class="text-xs font-bold text-slate-900 dark:text-white">
-                                            {{ $racer->character?->name }}
-                                        </div>
-                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-black {{ $racer->tier_rank === 'SS' ? 'bg-gradient-to-r from-amber-400 to-rose-400 text-slate-950' : 'bg-rose-500 text-white' }}">
-                                            {{ $racer->tier_rank }}
-                                        </span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </div>
-
-                <!-- Primary Action CTA Button -->
-                <div class="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center gap-3 flex-shrink-0">
-                    <a href="{{ route('cm.show', $activeEvent) }}"
-                       class="inline-flex items-center justify-center space-x-2 px-6 py-4 rounded-2xl text-sm font-black bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-xl shadow-amber-500/20 hover:scale-[1.02] transition-all duration-200 text-center">
-                        <span>Open Full CM Meta Guide</span>
-                        <svg class="w-4 h-4 text-slate-950 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </a>
-
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 text-center font-medium">
-                        Updated with verified Global builds
-                    </span>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- 2. CM Archive Grid (Ordered Newest to Oldest) -->
-    <div x-data="{
-        events: {{ json_encode($events) }},
-        filterDistance: 'All',
-        filterSurface: 'All',
-
-        filteredEvents() {
-            return this.events.filter(event => {
-                if (this.filterDistance !== 'All' && event.distance_type !== this.filterDistance) return false;
-                if (this.filterSurface !== 'All' && event.surface !== this.filterSurface) return false;
-                return true;
-            });
-        }
-    }" class="space-y-6">
-        
-        <!-- Archive Header & Filters -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-sky-100 dark:border-sky-900/40 pb-4">
-            <div>
-                <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center space-x-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                    <span>Champions Meeting Tournaments Archive</span>
-                </h2>
-                <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Explore tier lists, builds, and strategies across all historical CM editions.</p>
-            </div>
-
-            <!-- Client-side Alpine Filter Pills -->
-            <div class="flex flex-wrap items-center gap-2">
-                <!-- Distance Filter -->
-                <div class="flex items-center space-x-1 bg-white dark:bg-[#11192E] p-1 rounded-2xl border border-sky-100 dark:border-sky-900/40 text-xs shadow-sm">
-                    @foreach (['All', 'Sprint', 'Mile', 'Medium', 'Long'] as $dist)
-                        <button type="button" @click="filterDistance = '{{ $dist }}'"
-                                :class="filterDistance === '{{ $dist }}' ? 'bg-sky-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                                class="px-2.5 py-1 rounded-xl transition-colors">
-                            {{ $dist }}
-                        </button>
-                    @endforeach
-                </div>
-
-                <!-- Surface Filter -->
-                <div class="flex items-center space-x-1 bg-white dark:bg-[#11192E] p-1 rounded-2xl border border-sky-100 dark:border-sky-900/40 text-xs shadow-sm">
-                    @foreach (['All', 'Turf', 'Dirt'] as $surf)
-                        <button type="button" @click="filterSurface = '{{ $surf }}'"
-                                :class="filterSurface === '{{ $surf }}' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                                class="px-2.5 py-1 rounded-xl transition-colors">
-                            {{ $surf }}
-                        </button>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <template x-for="event in filteredEvents()" :key="event.id">
-                <a :href="'/cm/' + event.slug"
-                   class="group bg-white dark:bg-[#11192E] hover:bg-sky-50/50 dark:hover:bg-[#16223D] border border-sky-100 dark:border-sky-900/40 hover:border-amber-500/40 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col justify-between space-y-4 hover:-translate-y-0.5">
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-black font-mono uppercase px-2.5 py-0.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60"
-                                  x-text="event.cm_number ? 'CM #' + event.cm_number : 'Tournament'"></span>
-
-                            <template x-if="event.is_active">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
-                                    Active CM
-                                </span>
-                            </template>
-                            <template x-if="!event.is_active">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
-                                    Archive
-                                </span>
-                            </template>
-                        </div>
-
-                        <div>
-                            <h3 class="text-xl font-black text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors"
-                                x-text="event.title"></h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium" x-text="event.track_name"></p>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-                                  x-text="event.distance_type + ' (' + event.distance_meters + 'm)'"></span>
-                            <span class="px-2 py-0.5 rounded border"
-                                  :class="event.surface === 'Turf' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'"
-                                  x-text="event.surface"></span>
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-sky-50 dark:border-sky-900/30 flex items-center justify-between text-xs">
-                        <span class="text-slate-500 dark:text-slate-400 font-mono" x-text="(event.tier_entries_count || 0) + ' ranked Umas'"></span>
-                        <span class="font-bold text-sky-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform inline-flex items-center space-x-1">
-                            <span>View Guide</span>
-                            <span>&rarr;</span>
-                        </span>
-                    </div>
-                </a>
-            </template>
-        </div>
-    </div>
-
-    <!-- 3. Future Encyclopedia Teaser Grid -->
-    <div class="space-y-6 pt-4">
-        <div class="border-b border-sky-100 dark:border-sky-900/40 pb-3">
-            <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center space-x-2">
-                <span class="text-amber-500">✦</span>
-                <span>Uma Musume Knowledge Base & Encyclopedia</span>
-            </h2>
-            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Complementary guides to master training loops, support decks, and race math.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <!-- Card 1: Uma Database -->
-            <a href="{{ route('guides.umas') }}"
-               class="group bg-white dark:bg-[#11192E] border border-sky-100 dark:border-sky-900/40 hover:border-sky-300 dark:hover:border-sky-700 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
-                    🏇
-                </div>
-                <div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                        Uma Musume Database
-                    </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Growth rate distributions, hidden race bonuses, and base aptitude charts for every racer.
-                    </p>
-                </div>
-                <span class="inline-block text-[11px] font-bold text-sky-600 dark:text-sky-400">Browse Encyclopedia &rarr;</span>
             </a>
 
-            <!-- Card 2: Support Cards -->
+            <!-- Hub Card 2: Support Cards (Supoka) -->
             <a href="{{ route('guides.supoka') }}"
-               class="group bg-white dark:bg-[#11192E] border border-sky-100 dark:border-sky-900/40 hover:border-amber-300 dark:hover:border-amber-700 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
-                    🎴
+               class="group bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 hover:border-cerulean-500/60 dark:hover:border-cerulean-500/60 rounded-lg p-5 flex flex-col justify-between transition-all duration-150 shadow-sm hover:shadow-md">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-md bg-cerulean-500/15 border border-cerulean-500/30 flex items-center justify-center text-cerulean-500 group-hover:bg-cerulean-500 group-hover:text-white transition-colors">
+                            <!-- Cards Stack Icon -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-cerulean-600 dark:text-cerulean-400 bg-cerulean-500/10 px-2 py-0.5 rounded border border-cerulean-500/20">
+                            Supoka Decks
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-navy-950 dark:text-sail-100 group-hover:text-cerulean-500 transition-colors font-sans">
+                            {{ __('ui.database.supoka_title') }}
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            {{ __('ui.database.supoka_desc') }}
+                        </p>
+                    </div>
+
+                    <div class="pt-2 border-t border-sail-100 dark:border-navy-750 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span>SSR/SR &bull; Hint Pool</span>
+                        <span class="text-cerulean-500 font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                        Support Card Compendium
-                    </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        SSR / SR card evaluation, training event choice trees, friendship bonuses, and hint skill lists.
-                    </p>
-                </div>
-                <span class="inline-block text-[11px] font-bold text-amber-600 dark:text-amber-400">Inspect Cards &rarr;</span>
             </a>
 
-            <!-- Card 3: Skills & Mechanics -->
+            <!-- Hub Card 3: Skills Encyclopedia -->
             <a href="{{ route('guides.skills') }}"
-               class="group bg-white dark:bg-[#11192E] border border-sky-100 dark:border-sky-900/40 hover:border-indigo-300 dark:hover:border-indigo-700 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
-                    ⚡
+               class="group bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 hover:border-emerald-500/60 dark:hover:border-emerald-500/60 rounded-lg p-5 flex flex-col justify-between transition-all duration-150 shadow-sm hover:shadow-md">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-md bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                            <!-- Lightning / Trigger Icon -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                            Mechanics
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-navy-950 dark:text-sail-100 group-hover:text-emerald-500 transition-colors font-sans">
+                            {{ __('ui.database.skills_title') }}
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            {{ __('ui.database.skills_desc') }}
+                        </p>
+                    </div>
+
+                    <div class="pt-2 border-t border-sail-100 dark:border-navy-750 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span>Accel &bull; Velo &bull; Heal</span>
+                        <span class="text-emerald-500 font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        Skills & Race Mechanics
-                    </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Acceleration vs target speed, final stretch phase timing, stamina calculation, and guts thresholds.
-                    </p>
-                </div>
-                <span class="inline-block text-[11px] font-bold text-indigo-600 dark:text-indigo-400">Learn Mechanics &rarr;</span>
             </a>
+
+            <!-- Hub Card 4: Champions Meeting Archive (Dedicated Page) -->
+            <a href="{{ route('cm.archive') }}"
+               class="group bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 hover:border-brass-500/60 dark:hover:border-brass-500/60 rounded-lg p-5 flex flex-col justify-between transition-all duration-150 shadow-sm hover:shadow-md">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-md bg-brass-500/15 border border-brass-500/30 flex items-center justify-center text-brass-500 group-hover:bg-brass-500 group-hover:text-navy-950 transition-colors">
+                            <!-- Trophy / Tournament Archive Icon -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-5-8a5 5 0 0110 0v1a2 2 0 01-2 2H9a2 2 0 01-2-2v-1zm-3-4a3 3 0 013-3h1m8 0h1a3 3 0 013 3v2a3 3 0 01-3 3h-1m-8 0H6a3 3 0 01-3-3v-2z" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-brass-600 dark:text-brass-400 bg-brass-500/10 px-2 py-0.5 rounded border border-brass-500/20">
+                            Tournament Archive
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-navy-950 dark:text-sail-100 group-hover:text-brass-500 transition-colors font-sans">
+                            {{ __('ui.cm.past_editions') }}
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            Comprehensive records of historical Champions Meetings, track telemetry, and archival tier lists.
+                        </p>
+                    </div>
+
+                    <div class="pt-2 border-t border-sail-100 dark:border-navy-750 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span>Past Editions &bull; Tiers</span>
+                        <span class="text-brass-500 font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    </div>
+                </div>
+            </a>
+
         </div>
-    </div>
+    </section>
 
 </div>
 @endsection

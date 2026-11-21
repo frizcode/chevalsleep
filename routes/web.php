@@ -4,12 +4,24 @@ use App\Http\Controllers\Admin\AssetImportController;
 use App\Http\Controllers\Admin\CharacterController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\SupportCardController;
 use App\Http\Controllers\Admin\TierBuilderController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\BookmarkController;
 use App\Http\Controllers\Public\CmController;
+use App\Http\Controllers\Public\DatabaseController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\TierListController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Language Switcher (EN / ID)
+|--------------------------------------------------------------------------
+*/
+Route::get('/lang/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 
 /*
 |--------------------------------------------------------------------------
@@ -20,37 +32,22 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Champions Meeting Meta Guides
 Route::get('/cm', [CmController::class, 'latest'])->name('cm.latest');
+Route::get('/cm-archive', [CmController::class, 'archive'])->name('cm.archive');
 Route::get('/cm/{event:slug}', [CmController::class, 'show'])->name('cm.show');
+Route::post('/cm/{event:slug}/bookmark', [BookmarkController::class, 'toggle'])->name('cm.bookmark');
 
 // Legacy tier list route redirect / fallback
 Route::get('/tier-list', [TierListController::class, 'index'])->name('tier-list');
 
-// Encyclopedia & Wiki Placeholders (Cheval Grand Coming Soon Views)
+// Public Master Database & Encyclopedias (Replacing Placeholders)
 Route::prefix('guides')->name('guides.')->group(function () {
-    Route::get('/umas', function () {
-        return view('public.guides.placeholder', [
-            'title' => 'Uma Musume Encyclopedia',
-            'subtitle' => 'Comprehensive database of all Global & JP Uma Musume racers, growth rates, aptitudes, and hidden mechanics.',
-            'category' => 'Uma Database',
-        ]);
-    })->name('umas');
-
-    Route::get('/supoka', function () {
-        return view('public.guides.placeholder', [
-            'title' => 'Support Card (Supoka) Compendium',
-            'subtitle' => 'Detailed tier ranking, hint skill pools, training event options, and specialization multipliers for all Support Cards.',
-            'category' => 'Support Cards',
-        ]);
-    })->name('supoka');
-
-    Route::get('/skills', function () {
-        return view('public.guides.placeholder', [
-            'title' => 'Skills & Race Mechanics Guide',
-            'subtitle' => 'In-depth breakdown of acceleration phases, target velocity calculation, stamina drain mechanics, and track factor conversions.',
-            'category' => 'Mechanics & Skills',
-        ]);
-    })->name('skills');
+    Route::get('/umas', [DatabaseController::class, 'umas'])->name('umas');
+    Route::get('/supoka', [DatabaseController::class, 'supoka'])->name('supoka');
+    Route::get('/skills', [DatabaseController::class, 'skills'])->name('skills');
 });
+
+// User Bookmarked CM Guides
+Route::middleware('auth')->get('/my-bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -58,8 +55,11 @@ Route::prefix('guides')->name('guides.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', function () {
-    return redirect()->route('admin.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('home');
+})->middleware(['auth'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -74,10 +74,10 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin CMS Routes
+| Admin CMS Routes (Protected by Auth & Admin Role Middleware)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // GameTora Asset Importer
@@ -87,8 +87,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('events/{event}/activate', [EventController::class, 'activate'])->name('events.activate');
     Route::resource('events', EventController::class);
 
-    // Characters Management
+    // Master Database: Characters (Uma)
     Route::resource('characters', CharacterController::class);
+
+    // Master Database: Skills
+    Route::resource('skills', SkillController::class);
+
+    // Master Database: Support Cards
+    Route::resource('support-cards', SupportCardController::class);
 
     // Tier Builder
     Route::get('events/{event}/tiers', [TierBuilderController::class, 'index'])->name('events.tiers.index');

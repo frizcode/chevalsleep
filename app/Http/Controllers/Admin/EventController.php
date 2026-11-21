@@ -56,6 +56,10 @@ class EventController extends Controller
         $validated['supoka_decks']          = $this->cleanArray($request->input('decks', []));
         $validated['team_compositions']     = $this->cleanArray($request->input('teams', []));
 
+        $validated['season'] = $validated['season'] ?? 'Winter';
+        $validated['weather'] = $validated['weather'] ?? 'Sunny';
+        $validated['track_condition'] = $validated['track_condition'] ?? 'Firm';
+
         $event = Event::create($validated);
 
         if ($isActive) {
@@ -144,9 +148,9 @@ class EventController extends Controller
             'distance_type'  => ['required', Rule::in(['Sprint', 'Mile', 'Medium', 'Long'])],
             'distance_meters'=> ['required', 'integer', 'min:800', 'max:3600'],
             'surface'        => ['required', Rule::in(['Turf', 'Dirt'])],
-            'season'         => ['required', Rule::in(['Spring', 'Summer', 'Autumn', 'Winter'])],
-            'weather'        => ['required', Rule::in(['Sunny', 'Cloudy', 'Rainy', 'Snowy'])],
-            'track_condition'=> ['required', Rule::in(['Firm', 'Good', 'Soft', 'Heavy'])],
+            'season'         => ['nullable', Rule::in(['Spring', 'Summer', 'Autumn', 'Winter'])],
+            'weather'        => ['nullable', Rule::in(['Sunny', 'Cloudy', 'Rainy', 'Snowy'])],
+            'track_condition'=> ['nullable', Rule::in(['Firm', 'Good', 'Soft', 'Heavy'])],
             'is_active'      => ['nullable', 'boolean'],
         ]);
     }

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Changelog;
 use App\Models\Character;
 use App\Models\Event;
+use App\Models\Skill;
+use App\Models\SupportCard;
 use App\Models\TierEntry;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -17,12 +19,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Default Admin User
-        User::updateOrCreate(
+        // 1. Default Admin & Trainer Users
+        $admin = User::updateOrCreate(
             ['email' => 'admin@chevalsleep.test'],
             [
                 'name' => 'Admin ChevalSleep',
                 'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $trainer = User::updateOrCreate(
+            ['email' => 'trainer@chevalsleep.test'],
+            [
+                'name' => 'Trainer Cheval',
+                'password' => Hash::make('password'),
+                'role' => 'user',
                 'email_verified_at' => now(),
             ]
         );
@@ -621,6 +634,143 @@ class DatabaseSeeder extends Seeder
 
         foreach ($changelogs as $log) {
             Changelog::create($log);
+        }
+
+        // 7. Seed Demo Bookmark for Trainer User
+        if (! $trainer->bookmarkedEvents()->where('event_id', $aquariusCup->id)->exists()) {
+            $trainer->bookmarkedEvents()->attach($aquariusCup->id);
+        }
+
+        // 8. Sample Global Server Skills
+        $sampleSkills = [
+            [
+                'name' => 'No Stopping Me!',
+                'slug' => 'no-stopping-me',
+                'rarity' => 'Rare',
+                'skill_type' => 'Acceleration',
+                'running_style' => 'Pace Chaser',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Final corner, positioned 4th–9th (Pace Chaser)',
+                'description' => 'Greatly accelerates out of the final corner when breaking through the pack.',
+            ],
+            [
+                'name' => 'Angling and Scheming',
+                'slug' => 'angling-and-scheming',
+                'rarity' => 'Unique',
+                'skill_type' => 'Acceleration',
+                'running_style' => 'Front Runner',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Final corner, 1st place (Front Runner)',
+                'description' => 'Seiun Sky unique: Unleashes burst acceleration when holding the lead going into the final stretch.',
+            ],
+            [
+                'name' => "Let's Pump Some Iron!",
+                'slug' => 'lets-pump-some-iron',
+                'rarity' => 'Unique',
+                'skill_type' => 'Acceleration',
+                'running_style' => 'Late Surger',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Final corner, positioned 6th–9th (Late Surger)',
+                'description' => 'Mejiro Ryan unique: Explosive burst of acceleration from mid-back pack during late cornering.',
+            ],
+            [
+                'name' => 'Red Shift/LP1211-M',
+                'slug' => 'red-shift-lp1211-m',
+                'rarity' => 'Unique',
+                'skill_type' => 'Acceleration',
+                'running_style' => 'Pace Chaser',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Final stretch, positioned 3rd–5th',
+                'description' => 'Maruzensky unique: Accelerates aggressively when contesting top spots near the final corner.',
+            ],
+            [
+                'name' => 'Professor of Curvature',
+                'slug' => 'professor-of-curvature',
+                'rarity' => 'Rare',
+                'skill_type' => 'Velocity',
+                'running_style' => 'Universal',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Any corner throughout the race',
+                'description' => 'Increases velocity on all corners smoothly throughout the entire course.',
+            ],
+            [
+                'name' => 'Swinging Maestro',
+                'slug' => 'swinging-maestro',
+                'rarity' => 'Rare',
+                'skill_type' => 'Recovery',
+                'running_style' => 'Universal',
+                'distance_type' => 'Universal',
+                'activation_condition' => 'Random corner throughout the race',
+                'description' => 'Recovers significant endurance smoothly upon rounding any corner.',
+            ],
+        ];
+
+        foreach ($sampleSkills as $s) {
+            Skill::updateOrCreate(
+                ['slug' => $s['slug']],
+                $s
+            );
+        }
+
+        // 9. Sample Support Cards (Supoka)
+        $sampleCards = [
+            [
+                'name' => 'Kitasan Black',
+                'epithet' => 'Fire at My Heels',
+                'slug' => 'ssr-kitasan-black-fire-at-my-heels',
+                'rarity' => 'SSR',
+                'card_type' => 'Speed',
+                'specialty_priority' => 80,
+                'key_skills' => ['Professor of Curvature', 'Corner Specialist', 'Slipstream'],
+                'summary' => 'Premier Speed card with unmatched training specialty rate, high morale bonuses, and top gold corner velocity.',
+            ],
+            [
+                'name' => 'Fine Motion',
+                'epithet' => 'Thank you for your hard work!',
+                'slug' => 'ssr-fine-motion-thank-you-for-your-hard-work',
+                'rarity' => 'SSR',
+                'card_type' => 'Wit',
+                'specialty_priority' => 65,
+                'key_skills' => ['Speed Star', 'Right Turn', 'Autumn Umamusume'],
+                'summary' => 'Top-tier Wit card offering exceptional training stat yields and invaluable position keeping gold skill.',
+            ],
+            [
+                'name' => 'El Condor Pasa',
+                'epithet' => 'The Roar of Passion',
+                'slug' => 'ssr-el-condor-pasa-the-roar-of-passion',
+                'rarity' => 'SSR',
+                'card_type' => 'Speed',
+                'specialty_priority' => 60,
+                'key_skills' => ['Climbing Dragon', 'Pace Chaser Savvy', 'Playtime Is Over'],
+                'summary' => 'Dominant Speed card for medium and mile CM builds with versatile tactical skills.',
+            ],
+            [
+                'name' => 'Sweep Tosho',
+                'epithet' => 'Little Witch in Training',
+                'slug' => 'sr-sweep-tosho-little-witch-in-training',
+                'rarity' => 'SR',
+                'card_type' => 'Speed',
+                'specialty_priority' => 50,
+                'key_skills' => ['Trick (Front)', 'Corner Acceleration', 'Lucky Seven'],
+                'summary' => 'Budget king Speed card with outstanding stat training efficiency rivaling many SSRs.',
+            ],
+            [
+                'name' => 'Super Creek',
+                'epithet' => 'Gentle Flow of Sunlight',
+                'slug' => 'ssr-super-creek-gentle-flow-of-sunlight',
+                'rarity' => 'SSR',
+                'card_type' => 'Stamina',
+                'specialty_priority' => 70,
+                'key_skills' => ['Swinging Maestro', 'Deep Breaths', 'Corner Recovery'],
+                'summary' => 'Undisputed gold standard Stamina support card granting the most reliable recovery skill in the game.',
+            ],
+        ];
+
+        foreach ($sampleCards as $c) {
+            SupportCard::updateOrCreate(
+                ['slug' => $c['slug']],
+                $c
+            );
         }
     }
 }

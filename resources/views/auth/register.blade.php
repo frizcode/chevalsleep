@@ -1,52 +1,69 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+    <div class="mb-5 border-b border-sail-200 dark:border-navy-750 pb-3">
+        <h2 class="text-base font-bold text-navy-950 dark:text-sail-50">{{ __('ui.auth.register_title') }}</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ __('ui.auth.register_desc') }}</p>
+    </div>
+
+    <form method="POST" action="{{ route('register') }}" class="space-y-4 text-xs">
         @csrf
 
         <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <label for="name" class="block font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1 font-mono">
+                {{ __('ui.auth.name') }} <span class="text-rose-500">*</span>
+            </label>
+            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
+                   placeholder="Trainer Cheval"
+                   class="w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md px-3.5 py-2 text-xs sm:text-sm text-navy-900 dark:text-sail-100 placeholder-slate-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors">
+            <x-input-error :messages="$errors->get('name')" class="mt-1" />
         </div>
 
         <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div>
+            <label for="email" class="block font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1 font-mono">
+                {{ __('ui.auth.email') }} <span class="text-rose-500">*</span>
+            </label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
+                   placeholder="trainer@domain.com"
+                   class="w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md px-3.5 py-2 text-xs sm:text-sm text-navy-900 dark:text-sail-100 placeholder-slate-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors">
+            <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div>
+            <label for="password" class="block font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1 font-mono">
+                {{ __('ui.auth.password') }} <span class="text-rose-500">*</span>
+            </label>
+            <input id="password" type="password" name="password" required autocomplete="new-password"
+                   placeholder="••••••••"
+                   class="w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md px-3.5 py-2 text-xs sm:text-sm text-navy-900 dark:text-sail-100 placeholder-slate-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors">
+            <x-input-error :messages="$errors->get('password')" class="mt-1" />
         </div>
 
         <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div>
+            <label for="password_confirmation" class="block font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1 font-mono">
+                {{ __('ui.auth.confirm_password') }} <span class="text-rose-500">*</span>
+            </label>
+            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                   placeholder="••••••••"
+                   class="w-full bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 rounded-md px-3.5 py-2 text-xs sm:text-sm text-navy-900 dark:text-sail-100 placeholder-slate-400 focus:outline-none focus:border-cerulean-500 dark:focus:border-brass-500 transition-colors">
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
+        <!-- Submit Button -->
+        <div class="pt-2">
+            <button type="submit"
+                    class="w-full py-2.5 rounded-md text-xs font-bold uppercase tracking-wider bg-brass-500 hover:bg-brass-400 text-navy-950 transition-colors shadow-sm font-mono">
+                {{ __('ui.auth.register_btn') }}
+            </button>
+        </div>
 
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
+        <div class="text-center pt-3 border-t border-sail-200 dark:border-navy-750 text-slate-500 dark:text-slate-400">
+            <span>{{ __('ui.auth.already_registered') }}</span>
+            <a href="{{ route('login') }}" class="font-bold text-cerulean-600 dark:text-cerulean-400 hover:underline ms-1">
+                {{ __('ui.nav.login') }}
+            </a>
         </div>
     </form>
 </x-guest-layout>

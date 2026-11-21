@@ -7,6 +7,7 @@ use App\Models\Character;
 use App\Models\Event;
 use App\Models\TierEntry;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -69,6 +70,25 @@ class AppServiceProvider extends ServiceProvider
         Changelog::deleted(function (Changelog $changelog) use ($clearEventCache): void {
             $eventSlug = $changelog->event?->slug ?? Event::where('id', $changelog->event_id)->value('slug');
             $clearEventCache($eventSlug);
+        });
+
+        // View Composer for public navigation (Live & Past Champions Meetings)
+        View::composer('layouts.public', function ($view): void {
+            $liveEvents = Event::where('is_active', true)
+                ->orderByDesc('cm_number')
+                ->orderByDesc('id')
+                ->get();
+
+            $archivedEvents = Event::where('is_active', false)
+                ->orderByDesc('cm_number')
+                ->orderByDesc('id')
+                ->take(8)
+                ->get();
+
+            $view->with([
+                'navLiveEvents' => $liveEvents,
+                'navArchivedEvents' => $archivedEvents,
+            ]);
         });
     }
 }
