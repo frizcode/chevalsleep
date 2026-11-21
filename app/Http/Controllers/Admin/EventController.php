@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Skill;
+use App\Models\SupportCard;
+use App\Models\TierEntry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -14,28 +17,68 @@ use Illuminate\View\View;
 class EventController extends Controller
 {
     protected array $commonData = [
-        'distanceTypes'  => ['Sprint', 'Mile', 'Medium', 'Long'],
-        'surfaces'       => ['Turf', 'Dirt'],
-        'seasons'        => ['Spring', 'Summer', 'Autumn', 'Winter'],
-        'weathers'       => ['Sunny', 'Cloudy', 'Rainy', 'Snowy'],
+        'distanceTypes'   => ['Sprint', 'Mile', 'Medium', 'Long'],
+        'surfaces'        => ['Turf', 'Dirt'],
+        'seasons'         => ['Spring', 'Summer', 'Autumn', 'Winter'],
+        'weathers'        => ['Sunny', 'Cloudy', 'Rainy', 'Snowy'],
         'trackConditions' => ['Firm', 'Good', 'Soft', 'Heavy'],
-        'runningStyles'  => ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'],
+        'runningStyles'   => ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'],
     ];
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $events = Event::withCount('tierEntries')
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $term = strtolower($request->search);
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('title', 'like', "%{$term}%")
+                        ->orWhere('track_name', 'like', "%{$term}%")
+                        ->orWhere('cm_number', 'like', "%{$term}%")
+                        ->orWhere('slug', 'like', "%{$term}%");
+                });
+            })
+            ->when($request->filled('status') && $request->status !== 'All', function ($q) use ($request) {
+                if ($request->status === 'Live') {
+                    $q->where('is_active', true);
+                } elseif ($request->status === 'Archived') {
+                    $q->where('is_active', false);
+                }
+            })
+            ->when($request->filled('distance') && $request->distance !== 'All', function ($q) use ($request) {
+                $q->where('distance_type', $request->distance);
+            })
+            ->when($request->filled('surface') && $request->surface !== 'All', function ($q) use ($request) {
+                $q->where('surface', $request->surface);
+            })
             ->orderByDesc('cm_number')
             ->orderByDesc('is_active')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('admin.events.index', ['events' => $events]);
+        $totalEvents = Event::count();
+        $activeEvent = Event::where('is_active', true)->first();
+        $totalRankedUmas = TierEntry::count();
+
+        return view('admin.events.index', [
+            'events'          => $events,
+            'distanceTypes'   => $this->commonData['distanceTypes'],
+            'surfaces'        => $this->commonData['surfaces'],
+            'totalEvents'     => $totalEvents,
+            'activeEvent'     => $activeEvent,
+            'totalRankedUmas' => $totalRankedUmas,
+        ]);
     }
 
     public function create(): View
     {
-        return view('admin.events.create', $this->commonData);
+        $skillsList = Skill::orderBy('name')->get();
+        $supportCardsList = SupportCard::orderBy('name')->get();
+
+        return view('admin.events.create', array_merge($this->commonData, [
+            'skillsList'       => $skillsList,
+            'supportCardsList' => $supportCardsList,
+        ]));
     }
 
     public function store(Request $request): RedirectResponse
@@ -74,7 +117,14 @@ class EventController extends Controller
 
     public function edit(Event $event): View
     {
-        return view('admin.events.edit', array_merge($this->commonData, ['event' => $event]));
+        $skillsList = Skill::orderBy('name')->get();
+        $supportCardsList = SupportCard::orderBy('name')->get();
+
+        return view('admin.events.edit', array_merge($this->commonData, [
+            'event'            => $event,
+            'skillsList'       => $skillsList,
+            'supportCardsList' => $supportCardsList,
+        ]));
     }
 
     public function update(Request $request, Event $event): RedirectResponse
@@ -126,6 +176,15 @@ class EventController extends Controller
 
         return redirect()->back()
             ->with('status', "'{$event->title}' is now the active default CM.");
+    }
+
+    public function deactivate(Event $event): RedirectResponse
+    {
+        $event->update(['is_active' => false]);
+        $this->flushEventCaches();
+
+        return redirect()->back()
+            ->with('status', "'{$event->title}' has been moved to archive.");
     }
 
     // ─────────────────────────────────────────────────────────

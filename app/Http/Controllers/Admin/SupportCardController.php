@@ -73,6 +73,7 @@ class SupportCardController extends Controller
             'specialty_priority' => ['nullable', 'integer', 'min:0', 'max:100'],
             'key_skills' => ['nullable', 'string'],
             'summary' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'card_image' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
             'gametora_card_url' => ['nullable', 'url'],
         ]);
@@ -144,6 +145,7 @@ class SupportCardController extends Controller
             'specialty_priority' => ['nullable', 'integer', 'min:0', 'max:100'],
             'key_skills' => ['nullable', 'string'],
             'summary' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'card_image' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
             'gametora_card_url' => ['nullable', 'url'],
         ]);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Character extends Model
 {
@@ -25,6 +26,7 @@ class Character extends Model
         'default_running_style',
         'rarity',
         'aptitude_notes',
+        'source_url',
     ];
 
     /**
@@ -35,6 +37,7 @@ class Character extends Model
     protected $appends = [
         'full_name',
         'avatar_url',
+        'gametora_url',
     ];
 
     /**
@@ -82,6 +85,22 @@ class Character extends Model
             }
 
             return Storage::disk('public')->url($this->avatar_webp);
+        });
+    }
+
+    /**
+     * Get the GameTora URL for this character.
+     */
+    protected function gametoraUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if (! empty($this->source_url)) {
+                return $this->source_url;
+            }
+
+            $targetSlug = $this->slug ?: Str::slug($this->name);
+
+            return "https://gametora.com/umamusume/characters/{$targetSlug}";
         });
     }
 }

@@ -127,6 +127,16 @@
                           class="{{ $inp }}">{{ old('summary', $card->summary) }}</textarea>
             </div>
 
+            <!-- Source Reference URL (GameTora) -->
+            <div>
+                <label for="source_url" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 font-mono">
+                    Source URL (GameTora)
+                </label>
+                <input type="url" id="source_url" name="source_url" value="{{ old('source_url', $card->source_url) }}"
+                       placeholder="https://gametora.com/umamusume/supports/..." class="{{ $inp }}">
+                <p class="text-[10px] text-slate-400 font-mono mt-1">Direct GameTora support card link. Leave empty to auto-link to https://gametora.com/umamusume/supports/{slug}.</p>
+            </div>
+
             <!-- Card Artwork Sourcing (Dual inputs) -->
             <div class="pt-4 border-t border-sail-200 dark:border-navy-750 space-y-4">
                 <div>

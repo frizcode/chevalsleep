@@ -451,19 +451,24 @@ class="space-y-8">
                                     $skillName = is_array($item) ? ($item['name'] ?? '') : $item;
                                     $skillIcon = is_array($item) ? ($item['icon'] ?? null) : null;
                                 @endphp
-                                <div class="flex items-center space-x-2 p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60">
-                                    <div class="w-6 h-6 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
-                                        @if ($skillIcon)
-                                            <img src="{{ Str::startsWith($skillIcon, ['http://', 'https://']) ? $skillIcon : asset('storage/' . ltrim($skillIcon, '/')) }}"
-                                                 alt="{{ $skillName }}" class="w-full h-full object-cover">
-                                        @else
-                                            <svg class="w-3 h-3 text-brass-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                            </svg>
-                                        @endif
+                                <a href="https://umamusu.wiki/index.php?search={{ urlencode($skillName) }}" target="_blank" rel="noopener noreferrer"
+                                   title="View '{{ $skillName }}' on umamusu.wiki"
+                                   class="flex items-center justify-between p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60 hover:border-cerulean-500/60 dark:hover:border-brass-400/60 transition-colors group">
+                                    <div class="flex items-center space-x-2 min-w-0">
+                                        <div class="w-6 h-6 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
+                                            @if ($skillIcon)
+                                                <img src="{{ Str::startsWith($skillIcon, ['http://', 'https://']) ? $skillIcon : asset('storage/' . ltrim($skillIcon, '/')) }}"
+                                                     alt="{{ $skillName }}" class="w-full h-full object-cover">
+                                            @else
+                                                <svg class="w-3 h-3 text-brass-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                </svg>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs font-semibold text-navy-950 dark:text-slate-200 truncate group-hover:text-cerulean-600 dark:group-hover:text-brass-400 transition-colors">{{ $skillName }}</span>
                                     </div>
-                                    <span class="text-xs font-semibold text-navy-950 dark:text-slate-200 truncate">{{ $skillName }}</span>
-                                </div>
+                                    <span class="text-[9px] font-mono text-slate-400 group-hover:text-cerulean-600 dark:group-hover:text-brass-400 transition-colors ml-1">wiki &nearr;</span>
+                                </a>
                             @empty
                                 <div class="text-[11px] font-mono text-slate-400 italic py-1">No specific inheritances.</div>
                             @endforelse
@@ -508,13 +513,16 @@ class="space-y-8">
                                         $sName = is_array($skill) ? ($skill['name'] ?? '') : $skill;
                                         $sIcon = is_array($skill) ? ($skill['icon'] ?? null) : null;
                                     @endphp
-                                    <span class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
+                                    <a href="https://umamusu.wiki/index.php?search={{ urlencode($sName) }}" target="_blank" rel="noopener noreferrer"
+                                       title="View '{{ $sName }}' on umamusu.wiki"
+                                       class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-[11px] font-semibold text-rose-700 dark:text-rose-300 hover:border-rose-400 dark:hover:border-rose-600 transition-colors">
                                         @if ($sIcon)
                                             <img src="{{ Str::startsWith($sIcon, ['http://', 'https://']) ? $sIcon : asset('storage/' . ltrim($sIcon, '/')) }}"
                                                  alt="{{ $sName }}" class="w-3.5 h-3.5 rounded object-cover">
                                         @endif
                                         <span>{{ $sName }}</span>
-                                    </span>
+                                        <svg class="w-2.5 h-2.5 opacity-60 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
                                 @empty
                                     <span class="text-[11px] font-mono text-slate-400 italic">None specified.</span>
                                 @endforelse
@@ -530,13 +538,16 @@ class="space-y-8">
                                         $sName = is_array($skill) ? ($skill['name'] ?? '') : $skill;
                                         $sIcon = is_array($skill) ? ($skill['icon'] ?? null) : null;
                                     @endphp
-                                    <span class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-sail-100 dark:bg-navy-750 border border-sail-200 dark:border-navy-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                                    <a href="https://umamusu.wiki/index.php?search={{ urlencode($sName) }}" target="_blank" rel="noopener noreferrer"
+                                       title="View '{{ $sName }}' on umamusu.wiki"
+                                       class="inline-flex items-center space-x-1.5 px-2 py-1 rounded bg-sail-100 dark:bg-navy-750 border border-sail-200 dark:border-navy-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:border-cerulean-400 dark:hover:border-brass-400 transition-colors">
                                         @if ($sIcon)
                                             <img src="{{ Str::startsWith($sIcon, ['http://', 'https://']) ? $sIcon : asset('storage/' . ltrim($sIcon, '/')) }}"
                                                  alt="{{ $sName }}" class="w-3.5 h-3.5 rounded object-cover">
                                         @endif
                                         <span>{{ $sName }}</span>
-                                    </span>
+                                        <svg class="w-2.5 h-2.5 opacity-60 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
                                 @empty
                                     <span class="text-[11px] font-mono text-slate-400 italic">None specified.</span>
                                 @endforelse
@@ -577,19 +588,24 @@ class="space-y-8">
                                     $cardName = is_array($card) ? ($card['name'] ?? '') : $card;
                                     $cardIcon = is_array($card) ? ($card['icon'] ?? null) : null;
                                 @endphp
-                                <div class="p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60 flex items-center space-x-2">
-                                    <div class="w-7 h-7 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
-                                        @if ($cardIcon)
-                                            <img src="{{ Str::startsWith($cardIcon, ['http://', 'https://']) ? $cardIcon : asset('storage/' . ltrim($cardIcon, '/')) }}"
-                                                 alt="{{ $cardName }}" class="w-full h-full object-cover">
-                                        @else
-                                            <span class="text-[9px] font-mono font-bold text-brass-400">SSR</span>
-                                        @endif
+                                <a href="https://gametora.com/umamusume/supports?search={{ urlencode($cardName) }}" target="_blank" rel="noopener noreferrer"
+                                   title="View '{{ $cardName }}' on GameTora"
+                                   class="p-1.5 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700/60 flex items-center justify-between space-x-2 hover:border-brass-500/60 transition-colors group">
+                                    <div class="flex items-center space-x-2 min-w-0">
+                                        <div class="w-7 h-7 rounded bg-navy-950 flex items-center justify-center flex-shrink-0 border border-slate-700 overflow-hidden">
+                                            @if ($cardIcon)
+                                                <img src="{{ Str::startsWith($cardIcon, ['http://', 'https://']) ? $cardIcon : asset('storage/' . ltrim($cardIcon, '/')) }}"
+                                                     alt="{{ $cardName }}" class="w-full h-full object-cover">
+                                            @else
+                                                <span class="text-[9px] font-mono font-bold text-brass-400">SSR</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[11px] font-semibold text-navy-950 dark:text-slate-200 truncate leading-tight group-hover:text-brass-500 transition-colors" title="{{ $cardName }}">
+                                            {{ $cardName }}
+                                        </div>
                                     </div>
-                                    <div class="text-[11px] font-semibold text-navy-950 dark:text-slate-200 truncate leading-tight" title="{{ $cardName }}">
-                                        {{ $cardName }}
-                                    </div>
-                                </div>
+                                    <span class="text-[8px] font-mono text-slate-400 group-hover:text-brass-400 transition-colors ml-1">GT &nearr;</span>
+                                </a>
                             @endforeach
                         </div>
 
@@ -784,7 +800,15 @@ class="space-y-8">
                 </div>
             </div>
 
-            <div class="pt-2 text-right border-t border-sail-200 dark:border-navy-700">
+            <div class="pt-2 flex items-center justify-between border-t border-sail-200 dark:border-navy-700">
+                <a :href="selectedEntry?.character?.gametora_url" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-brass-500/10 hover:bg-brass-500/20 text-brass-600 dark:text-brass-400 border border-brass-500/30 text-xs font-mono font-bold transition-colors">
+                    <span>View Racer on GameTora</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+
                 <button @click="closeModal()" type="button"
                         class="px-4 py-1.5 rounded bg-navy-900 dark:bg-navy-700 text-brass-400 hover:text-brass-300 font-mono text-xs font-bold transition-colors">
                     CLOSE [ESC]

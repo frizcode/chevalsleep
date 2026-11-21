@@ -26,6 +26,7 @@ class Skill extends Model
         'distance_type',
         'activation_condition',
         'description',
+        'source_url',
     ];
 
     /**
@@ -35,6 +36,7 @@ class Skill extends Model
      */
     protected $appends = [
         'icon_url',
+        'wiki_url',
     ];
 
     /**
@@ -52,6 +54,24 @@ class Skill extends Model
             }
 
             return Storage::disk('public')->url($this->icon_webp);
+        });
+    }
+
+    /**
+     * Get the umamusu.wiki documentation URL for this skill.
+     */
+    protected function wikiUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if (! empty($this->source_url)) {
+                return $this->source_url;
+            }
+
+            if (! empty($this->name)) {
+                return 'https://umamusu.wiki/index.php?search=' . urlencode($this->name);
+            }
+
+            return 'https://umamusu.wiki/';
         });
     }
 }

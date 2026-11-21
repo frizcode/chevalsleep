@@ -117,6 +117,16 @@
                 </div>
             </div>
 
+            <!-- Source Reference URL (GameTora) -->
+            <div>
+                <label for="source_url" class="block text-xs font-semibold uppercase tracking-wider text-sail-600 dark:text-sail-400 mb-1.5 font-mono">
+                    Source URL (GameTora)
+                </label>
+                <input type="url" id="source_url" name="source_url" value="{{ old('source_url') }}"
+                       placeholder="https://gametora.com/umamusume/characters/..." class="{{ $inp }}">
+                <p class="text-[10px] text-sail-400 font-mono mt-1">Direct GameTora racer link. Leave empty to auto-link to https://gametora.com/umamusume/characters/{slug}.</p>
+            </div>
+
             <!-- Avatar: GameTora Asset Importer OR Manual Upload -->
             <div class="pt-4 border-t border-sail-200 dark:border-navy-750 space-y-4">
                 <div>

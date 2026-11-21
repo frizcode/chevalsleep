@@ -116,6 +116,25 @@ class ChevalSleepTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_view_create_and_edit_event_screens(): void
+    {
+        $this->actingAs($this->admin)->get('/admin/events/create')->assertStatus(200);
+        $this->actingAs($this->admin)->get("/admin/events/{$this->event->id}/edit")->assertStatus(200);
+    }
+
+    public function test_admin_can_deactivate_and_activate_event(): void
+    {
+        // Deactivate active event
+        $response = $this->actingAs($this->admin)->post("/admin/events/{$this->event->id}/deactivate");
+        $response->assertRedirect();
+        $this->assertFalse($this->event->fresh()->is_active);
+
+        // Activate it back
+        $response2 = $this->actingAs($this->admin)->post("/admin/events/{$this->event->id}/activate");
+        $response2->assertRedirect();
+        $this->assertTrue($this->event->fresh()->is_active);
+    }
+
     public function test_admin_can_add_character_and_manage_tiers_with_changelog(): void
     {
         // 1. Add tier entry
@@ -266,5 +285,62 @@ class ChevalSleepTest extends TestCase
             'name' => 'Kitasan Black',
             'rarity' => 'SSR',
         ]);
+    }
+
+    public function test_source_urls_and_wiki_gametora_references(): void
+    {
+        // 1. Skill default & custom wiki_url
+        $skill = \App\Models\Skill::create([
+            'name' => 'Groundwork',
+            'slug' => 'groundwork',
+            'rarity' => 'Normal',
+            'skill_type' => 'Acceleration',
+            'running_style' => 'Universal',
+            'distance_type' => 'Universal',
+        ]);
+
+        $this->assertEquals('https://umamusu.wiki/index.php?search=Groundwork', $skill->wiki_url);
+
+        $skillWithCustomUrl = \App\Models\Skill::create([
+            'name' => 'Early Lead',
+            'slug' => 'early-lead',
+            'rarity' => 'Normal',
+            'skill_type' => 'Acceleration',
+            'running_style' => 'Front Runner',
+            'distance_type' => 'Universal',
+            'source_url' => 'https://umamusu.wiki/skills/early-lead',
+        ]);
+
+        $this->assertEquals('https://umamusu.wiki/skills/early-lead', $skillWithCustomUrl->wiki_url);
+
+        // 2. Character default & custom gametora_url
+        $this->assertEquals('https://gametora.com/umamusume/characters/agnes-digital-alter', $this->character->gametora_url);
+
+        $this->character->update(['source_url' => 'https://gametora.com/umamusume/characters/agnes-digital']);
+        $this->assertEquals('https://gametora.com/umamusume/characters/agnes-digital', $this->character->fresh()->gametora_url);
+
+        // 3. SupportCard default & custom gametora_url
+        $card = \App\Models\SupportCard::create([
+            'name' => 'Fine Motion',
+            'epithet' => 'Thanks for the Hospitality',
+            'slug' => 'ssr-fine-motion',
+            'rarity' => 'SSR',
+            'card_type' => 'Wit',
+        ]);
+
+        $this->assertEquals('https://gametora.com/umamusume/supports/ssr-fine-motion', $card->gametora_url);
+
+        // 4. Check public views render references
+        $skillPage = $this->get('/guides/skills');
+        $skillPage->assertStatus(200);
+        $skillPage->assertSee('umamusu.wiki');
+
+        $umaPage = $this->get('/guides/umas');
+        $umaPage->assertStatus(200);
+        $umaPage->assertSee('GameTora');
+
+        $supokaPage = $this->get('/guides/supoka');
+        $supokaPage->assertStatus(200);
+        $supokaPage->assertSee('GameTora');
     }
 }

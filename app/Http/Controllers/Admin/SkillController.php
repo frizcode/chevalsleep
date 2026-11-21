@@ -77,6 +77,7 @@ class SkillController extends Controller
             'distance_type' => ['required', Rule::in(['Universal', 'Sprint', 'Mile', 'Medium', 'Long'])],
             'activation_condition' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'icon' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg,svg', 'max:2048'],
             'gametora_icon_url' => ['nullable', 'url'],
         ]);
@@ -143,6 +144,7 @@ class SkillController extends Controller
             'distance_type' => ['required', Rule::in(['Universal', 'Sprint', 'Mile', 'Medium', 'Long'])],
             'activation_condition' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'icon' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg,svg', 'max:2048'],
             'gametora_icon_url' => ['nullable', 'url'],
         ]);

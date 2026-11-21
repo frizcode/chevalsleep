@@ -85,6 +85,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Events Management
     Route::post('events/{event}/activate', [EventController::class, 'activate'])->name('events.activate');
+    Route::post('events/{event}/deactivate', [EventController::class, 'deactivate'])->name('events.deactivate');
     Route::resource('events', EventController::class);
 
     // Master Database: Characters (Uma)

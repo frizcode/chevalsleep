@@ -53,6 +53,8 @@ class CharacterController extends Controller
             'slug' => ['nullable', 'string', 'max:255', 'unique:characters,slug'],
             'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
             'rarity' => ['required', 'integer', 'min:1', 'max:3'],
+            'aptitude_notes' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
             'gametora_avatar_url' => ['nullable', 'url'],
         ]);
@@ -113,6 +115,8 @@ class CharacterController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('characters', 'slug')->ignore($character->id)],
             'default_running_style' => ['required', Rule::in(['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'])],
             'rarity' => ['required', 'integer', 'min:1', 'max:3'],
+            'aptitude_notes' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url', 'max:500'],
             'avatar' => ['nullable', 'image', 'mimes:webp,png,jpg,jpeg', 'max:2048'],
             'gametora_avatar_url' => ['nullable', 'url'],
         ]);

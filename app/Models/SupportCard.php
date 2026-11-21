@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SupportCard extends Model
 {
@@ -26,6 +27,7 @@ class SupportCard extends Model
         'specialty_priority',
         'key_skills',
         'summary',
+        'source_url',
     ];
 
     /**
@@ -46,6 +48,7 @@ class SupportCard extends Model
     protected $appends = [
         'full_title',
         'card_url',
+        'gametora_url',
     ];
 
     /**
@@ -77,6 +80,22 @@ class SupportCard extends Model
             }
 
             return Storage::disk('public')->url($this->card_webp);
+        });
+    }
+
+    /**
+     * Get the GameTora URL for this support card.
+     */
+    protected function gametoraUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if (! empty($this->source_url)) {
+                return $this->source_url;
+            }
+
+            $targetSlug = $this->slug ?: Str::slug($this->name);
+
+            return "https://gametora.com/umamusume/supports/{$targetSlug}";
         });
     }
 }

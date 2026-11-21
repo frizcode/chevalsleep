@@ -130,6 +130,16 @@
                 <textarea id="description" name="description" rows="2" class="{{ $inp }}">{{ old('description', $skill->description) }}</textarea>
             </div>
 
+            <!-- Source Reference URL (umamusu.wiki) -->
+            <div>
+                <label for="source_url" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 font-mono">
+                    Source URL (umamusu.wiki)
+                </label>
+                <input type="url" id="source_url" name="source_url" value="{{ old('source_url', $skill->source_url) }}"
+                       placeholder="https://umamusu.wiki/..." class="{{ $inp }}">
+                <p class="text-[10px] text-slate-400 font-mono mt-1">Direct umamusu.wiki link for formulas & data. Leave empty to auto-search on umamusu.wiki by skill name.</p>
+            </div>
+
             <!-- Icon Sourcing (Dual inputs) -->
             <div class="pt-4 border-t border-sail-200 dark:border-navy-750 space-y-4">
                 <div>

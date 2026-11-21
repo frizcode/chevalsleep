@@ -6,7 +6,19 @@
     selectedRarity: 'All',
     selectedType: 'All',
     selectedStyle: 'All',
+    selectedSkill: null,
+    modalOpen: false,
     skills: {{ json_encode($skills) }},
+
+    openSkill(s) {
+        this.selectedSkill = s;
+        this.modalOpen = true;
+    },
+
+    closeModal() {
+        this.modalOpen = false;
+        this.selectedSkill = null;
+    },
 
     filteredSkills() {
         return this.skills.filter(s => {
@@ -23,7 +35,7 @@
             return true;
         });
     }
-}" class="space-y-6">
+}" @keydown.escape.window="closeModal()" class="space-y-6">
 
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sail-200 dark:border-navy-700">
@@ -37,7 +49,7 @@
                 {{ __('ui.database.skills_title') }}
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {{ __('ui.database.skills_desc') }}
+                {{ __('ui.database.skills_desc') }} Click any skill to inspect trigger formulas &amp; view community source on umamusu.wiki.
             </p>
         </div>
 
@@ -119,12 +131,13 @@
     <!-- Skills List Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <template x-for="skill in filteredSkills()" :key="skill.id">
-            <div class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-3.5 flex flex-col justify-between space-y-2.5 shadow-sm hover:border-cerulean-500/60 dark:hover:border-brass-400/60 transition-colors">
+            <div @click="openSkill(skill)"
+                 class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-3.5 flex flex-col justify-between space-y-2.5 shadow-sm hover:border-cerulean-500/80 dark:hover:border-brass-400/80 hover:shadow-md transition-all cursor-pointer group">
                 
                 <div class="space-y-2">
                     <!-- Icon, Name, and Badges -->
                     <div class="flex items-start space-x-3">
-                        <div class="w-10 h-10 rounded-md bg-sail-100 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <div class="w-10 h-10 rounded-md bg-sail-100 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 overflow-hidden flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                             <template x-if="skill.icon_url">
                                 <img :src="skill.icon_url" :alt="skill.name" class="w-full h-full object-cover">
                             </template>
@@ -137,7 +150,7 @@
 
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
-                                <h3 class="font-bold text-xs text-navy-950 dark:text-sail-100 leading-snug" x-text="skill.name"></h3>
+                                <h3 class="font-bold text-xs text-navy-950 dark:text-sail-100 leading-snug group-hover:text-cerulean-600 dark:group-hover:text-brass-400 transition-colors" x-text="skill.name"></h3>
                                 
                                 <!-- Rarity Badge -->
                                 <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border"
@@ -188,6 +201,21 @@
                 <template x-if="skill.description">
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug pt-1 border-t border-sail-100 dark:border-navy-750" x-text="skill.description"></p>
                 </template>
+
+                <!-- Footer with umamusu.wiki Direct Link Badge -->
+                <div class="pt-2 border-t border-sail-100 dark:border-navy-750 flex items-center justify-between text-[10px] font-mono">
+                    <span class="text-slate-400 flex items-center space-x-1">
+                        <span>Click for details</span>
+                    </span>
+
+                    <a :href="skill.wiki_url" target="_blank" rel="noopener noreferrer" @click.stop
+                       class="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-cerulean-500/10 hover:bg-cerulean-500/20 text-cerulean-600 dark:text-cerulean-400 border border-cerulean-500/30 font-semibold transition-colors">
+                        <span>umamusu.wiki</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </template>
     </div>
@@ -195,6 +223,110 @@
     <!-- Empty State -->
     <div x-show="filteredSkills().length === 0" class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg p-10 text-center text-xs text-slate-400 italic">
         {{ __('ui.database.no_results') }}
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- INTERACTIVE SKILL EXPLANATION MODAL (Source: umamusu.wiki)   -->
+    <!-- ============================================================= -->
+    <div x-show="modalOpen" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        
+        <div @click.away="closeModal()"
+             x-show="modalOpen"
+             class="bg-white dark:bg-navy-800 border border-sail-200 dark:border-navy-700 rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-xl relative text-left">
+            
+            <button @click="closeModal()" type="button"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-navy-950 dark:hover:text-white font-mono text-sm">
+                [ESC] &times;
+            </button>
+
+            <!-- Modal Header -->
+            <div class="flex items-start space-x-3.5 pb-3 border-b border-sail-200 dark:border-navy-700">
+                <div class="w-12 h-12 rounded-md overflow-hidden bg-sail-100 dark:bg-navy-950 border border-sail-200 dark:border-navy-700 flex items-center justify-center flex-shrink-0">
+                    <template x-if="selectedSkill?.icon_url">
+                        <img :src="selectedSkill.icon_url" :alt="selectedSkill.name" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!selectedSkill?.icon_url">
+                        <svg class="w-6 h-6 text-brass-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </template>
+                </div>
+
+                <div class="space-y-1 pr-6">
+                    <div class="flex items-center space-x-1.5 flex-wrap gap-1 font-mono text-[10px]">
+                        <span class="px-1.5 py-0.2 rounded font-bold border"
+                              :class="{
+                                  'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30': selectedSkill?.rarity === 'Unique',
+                                  'bg-brass-500/15 text-brass-600 dark:text-brass-400 border-brass-500/40': selectedSkill?.rarity === 'Rare',
+                                  'bg-cerulean-500/10 text-cerulean-600 dark:text-cerulean-400 border-cerulean-500/30': selectedSkill?.rarity === 'Inherited',
+                                  'bg-sail-100 dark:bg-navy-700 text-slate-600 dark:text-slate-300 border-sail-200 dark:border-navy-600': selectedSkill?.rarity === 'Normal'
+                              }"
+                              x-text="selectedSkill?.rarity"></span>
+
+                        <span class="px-1.5 py-0.2 rounded font-semibold border"
+                              :class="{
+                                  'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30': selectedSkill?.skill_type === 'Acceleration',
+                                  'bg-cerulean-500/10 text-cerulean-600 dark:text-cerulean-400 border-cerulean-500/30': selectedSkill?.skill_type === 'Velocity',
+                                  'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30': selectedSkill?.skill_type === 'Recovery',
+                                  'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30': selectedSkill?.skill_type === 'Debuff',
+                                  'bg-brass-500/10 text-brass-600 dark:text-brass-400 border-brass-500/30': selectedSkill?.skill_type === 'Passive'
+                              }"
+                              x-text="selectedSkill?.skill_type"></span>
+
+                        <span class="px-1.5 py-0.2 rounded bg-sail-100 dark:bg-navy-750 text-slate-600 dark:text-slate-300 border border-sail-200 dark:border-navy-700"
+                              x-text="selectedSkill?.running_style"></span>
+
+                        <span class="px-1.5 py-0.2 rounded bg-sail-100 dark:bg-navy-750 text-slate-600 dark:text-slate-300 border border-sail-200 dark:border-navy-700"
+                              x-text="selectedSkill?.distance_type"></span>
+                    </div>
+
+                    <h3 class="font-bold text-base text-navy-950 dark:text-sail-100 font-sans" x-text="selectedSkill?.name"></h3>
+                </div>
+            </div>
+
+            <!-- Modal Body Details -->
+            <div class="space-y-3.5 text-xs">
+                <!-- Trigger Condition -->
+                <div>
+                    <span class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">ACTIVATION / TRIGGER CONDITION</span>
+                    <div class="p-3 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 font-mono text-[11px] text-slate-800 dark:text-slate-200 leading-relaxed"
+                         x-text="selectedSkill?.activation_condition || 'Universal trigger (No special condition required).'"></div>
+                </div>
+
+                <!-- Formula / Effect Description -->
+                <div>
+                    <span class="block text-[10px] font-mono uppercase font-bold text-cerulean-600 dark:text-cerulean-400 mb-1">EXPLANATION &amp; EFFECT FORMULA</span>
+                    <div class="p-3 rounded bg-sail-50 dark:bg-navy-900 border border-sail-200 dark:border-navy-700 text-slate-700 dark:text-slate-300 leading-relaxed font-sans text-xs"
+                         x-text="selectedSkill?.description || 'Formula description currently being verified from umamusu.wiki mechanics registry.'"></div>
+                </div>
+
+                <!-- Wiki Attribution & Direct Source Card -->
+                <div class="p-3 rounded bg-cerulean-500/5 dark:bg-cerulean-500/10 border border-cerulean-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-cerulean-700 dark:text-cerulean-300 block">External Source Reference</span>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300">
+                            Verified against <strong>umamusu.wiki</strong> race data &amp; mechanics engine.
+                        </p>
+                    </div>
+
+                    <a :href="selectedSkill?.wiki_url" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded bg-cerulean-600 hover:bg-cerulean-500 text-white font-mono text-xs font-bold shadow-sm transition-colors flex-shrink-0">
+                        <span>View on umamusu.wiki</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="pt-2 text-right border-t border-sail-200 dark:border-navy-700">
+                <button @click="closeModal()" type="button"
+                        class="px-4 py-1.5 rounded bg-navy-900 dark:bg-navy-700 text-brass-400 hover:text-brass-300 font-mono text-xs font-bold transition-colors">
+                    CLOSE [ESC]
+                </button>
+            </div>
+        </div>
     </div>
 
 </div>
